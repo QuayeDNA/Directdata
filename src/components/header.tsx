@@ -1,0 +1,548 @@
+import { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
+import { useAuth, useWallet, useDailySpending } from "../hooks";
+import { useSiteStatus } from "../contexts/site-status-context";
+import { settingsService } from "../services/settings.service";
+import { useToast } from "../design-system/components/toast";
+import { Button } from "../design-system";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaPowerOff,
+  FaCheck,
+  FaBars,
+  FaUser,
+  FaSignOutAlt,
+  FaWallet,
+  FaSync,
+  FaWifi,
+  FaShareAlt,
+  FaCopy,
+} from "react-icons/fa";
+import { DarkModeToggle } from "./common/dark-mode-toggle";
+import { NotificationDropdown } from "./notifications/NotificationDropdown";
+import { ImpersonationService } from "../utils/impersonation";
+import { canHaveWallet, isAdminUser, isBusinessUser } from "../utils/userTypeHelpers";
+import { referralService } from "../services/referral.service";
+
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export const Header = ({ onMenuClick }: HeaderProps) => {
+  const { authState, logout, refreshAuth } = useAuth();
+  const { walletBalance, refreshWallet, isLoading, connectionStatus } =
+    useWallet();
+  const { dailySpending, isLoading: dailySpendingLoading } = useDailySpending();
+  const { siteStatus, refreshSiteStatus } = useSiteStatus();
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isTogglingSite, setIsTogglingSite] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+
+  // Check if user can have a wallet (all business users)
+  const canShowWallet = canHaveWallet(authState.user?.userType || "");
+  const isAdmin = isAdminUser(authState.user?.userType || "");
+  const isAgent = isBusinessUser(authState.user?.userType || "");
+  const firstName = authState.user?.fullName.split(" ")[0] ?? "";
+  const [referralCopied, setReferralCopied] = useState(false);
+
+  useEffect(() => {
+    if (isAgent) {
+      referralService.getDashboard().then((dash) => {
+        if (dash?.referralCode) setReferralCode(dash.referralCode);
+      }).catch(() => {});
+    }
+  }, [isAgent]);
+
+  const copyReferralCode = async () => {
+    if (!referralCode) return;
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      setReferralCopied(true);
+      addToast("Referral code copied", "success");
+      setTimeout(() => setReferralCopied(false), 2000);
+    } catch {
+      addToast("Failed to copy", "error");
+    }
+  };
+
+  // Get connection status indicator
+  const getConnectionStatusIndicator = () => {
+    switch (connectionStatus) {
+      case "websocket":
+        return <FaWifi className="w-3 h-3 text-success" />;
+      case "polling":
+        return <FaSync className="w-3 h-3 text-warning animate-spin" />;
+      case "disconnected":
+        return <FaWifi className="w-3 h-3 text-error" />;
+      default:
+        return <FaWifi className="w-3 h-3 text-[var(--text-muted)]" />;
+    }
+  };
+
+  // Get connection status text
+  const getConnectionStatusText = () => {
+    switch (connectionStatus) {
+      case "websocket":
+        return "Live";
+      case "polling":
+        return "Syncing";
+      case "disconnected":
+        return "Offline";
+      default:
+        return "Unknown";
+    }
+  };
+
+  // Compute default greeting text based on the current time of day
+  const getDefaultGreetingText = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const greetingText = siteStatus?.greetingText?.trim() || getDefaultGreetingText();
+  const welcomeMessage = siteStatus?.welcomeMessage?.trim() || "Welcome back!";
+  const showGreetingIcon = siteStatus?.showGreetingIcon ?? true;
+
+  const greetingContainerRef = useRef<HTMLDivElement>(null);
+  const greetingTextRef = useRef<HTMLDivElement>(null);
+  const welcomeContainerRef = useRef<HTMLDivElement>(null);
+  const welcomeTextRef = useRef<HTMLDivElement>(null);
+
+  const [greetingMarquee, setGreetingMarquee] = useState(false);
+  const [welcomeMarquee, setWelcomeMarquee] = useState(false);
+
+  const updateMarqueeState = useCallback(() => {
+    if (greetingContainerRef.current && greetingTextRef.current) {
+      setGreetingMarquee(
+        greetingTextRef.current.scrollWidth > greetingContainerRef.current.clientWidth + 2,
+      );
+    } else {
+      setGreetingMarquee(false);
+    }
+
+    if (welcomeContainerRef.current && welcomeTextRef.current) {
+      setWelcomeMarquee(
+        welcomeTextRef.current.scrollWidth > welcomeContainerRef.current.clientWidth + 2,
+      );
+    } else {
+      setWelcomeMarquee(false);
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    updateMarqueeState();
+    window.addEventListener("resize", updateMarqueeState);
+    return () => window.removeEventListener("resize", updateMarqueeState);
+  }, [updateMarqueeState, greetingText, welcomeMessage, firstName]);
+
+  // Format amount
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat("en-GH", {
+      style: "currency",
+      currency: "GHS",
+    }).format(amount);
+  };
+
+  // Handle site toggle for super admins
+  const handleSiteToggle = async () => {
+    if (!authState.user || authState.user.userType !== "super_admin") return;
+
+    setIsTogglingSite(true);
+    try {
+      await settingsService.toggleSiteStatus();
+
+      // Refresh site status immediately
+      await refreshSiteStatus();
+    } catch (error) {
+      console.error("Failed to toggle site status:", error);
+    } finally {
+      setIsTogglingSite(false);
+    }
+  };
+
+
+
+  // Track previous site status to show toast only on changes
+  const [prevSiteStatus, setPrevSiteStatus] = useState<boolean | null>(null);
+
+  // Show toast notification when site status changes (for all users)
+  useEffect(() => {
+    if (
+      siteStatus &&
+      authState.user &&
+      prevSiteStatus !== null &&
+      prevSiteStatus !== siteStatus.isSiteOpen
+    ) {
+      if (siteStatus.isSiteOpen) {
+        addToast("Site is now open for business! 🎉", "success", 3000);
+      } else {
+        addToast("Site is currently under maintenance 🔧", "warning", 4000);
+      }
+    }
+    setPrevSiteStatus(siteStatus?.isSiteOpen ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [siteStatus?.isSiteOpen, authState.user, addToast, prevSiteStatus]);
+
+  const handleReturnToAdmin = async () => {
+    try {
+      console.log("🔄 Starting return to admin process...");
+
+      // Use the proper impersonation service to end impersonation
+      await ImpersonationService.endImpersonation();
+
+      console.log("✅ Impersonation service completed");
+
+      // Close dropdown
+      setIsDropdownOpen(false);
+
+      // Directly refresh auth state instead of relying on event system
+      console.log("🔄 Refreshing auth state...");
+      await refreshAuth();
+
+      // Navigate to superadmin dashboard
+      console.log("🔄 Navigating to /superadmin...");
+      navigate("/superadmin");
+
+    } catch (error) {
+      console.error("❌ Failed to return to admin:", error);
+      addToast("Failed to return to admin", "error");
+    }
+  };
+
+
+
+  // Check if impersonating to adjust header position
+  const isImpersonating = ImpersonationService.isImpersonating();
+
+  return (
+    <header
+      className={`sticky z-10 shadow-sm border-b border-[var(--border-color)] rounded-b-xl ${isImpersonating ? "top-0" : "top-0"
+        }`}
+      style={{ background: "var(--bg-header)" }}
+    >
+      <div className="px-2 sm:px-6 lg:px-8 py-4 sm:py-5">
+        {/* Main Header Row */}
+        <div className="flex items-center justify-between gap-4">
+          {/* Left Section: Menu + Greeting */}
+          <div className="flex items-center gap-0 sm:gap-4 min-w-0 flex-1">
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onMenuClick}
+              className="md:hidden flex-shrink-0 text-white"
+              style={
+                {
+                  "--hover-bg": "var(--color-primary-hover)",
+                } as React.CSSProperties
+              }
+              aria-label="Open sidebar menu"
+            >
+              <FaBars className="w-5 h-5" />
+            </Button>
+
+            {/* Greeting Section */}
+            <div className="min-w-0 flex-1">
+              <div className="relative overflow-hidden">
+                <div className="transform transition-all duration-500 ease-in-out animate-slide-in-from-bottom">
+                  <div className="min-w-0">
+                    <div
+                      ref={greetingContainerRef}
+                      className="overflow-hidden whitespace-nowrap"
+                      aria-label="Greeting text"
+                    >
+                      <div
+                        ref={greetingTextRef}
+                        className={`inline-block whitespace-nowrap font-semibold text-sm sm:text-base lg:text-lg text-white ${greetingMarquee ? "animate-marquee min-w-max" : ""}`}
+                      >
+                        {greetingText}, {firstName}
+                      </div>
+                    </div>
+                    <div
+                      ref={welcomeContainerRef}
+                      className="overflow-hidden whitespace-nowrap mt-1 text-xs sm:text-sm text-white/80"
+                      aria-label="Welcome message"
+                    >
+                      <div
+                        ref={welcomeTextRef}
+                        className={`inline-block whitespace-nowrap ${welcomeMarquee ? "animate-marquee min-w-max" : ""}`}
+                      >
+                        {welcomeMessage}
+                        {showGreetingIcon && <span className="ml-1">👋</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Section: Actions + User */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
+            {/* Site Toggle - Only for admins */}
+            {isAdmin && (
+              <div className="hidden sm:block">
+                <Button
+                  variant={siteStatus?.isSiteOpen ? "success" : "danger"}
+                  size="sm"
+                  onClick={handleSiteToggle}
+                  disabled={isTogglingSite}
+                  className="text-xs"
+                  title={
+                    isTogglingSite
+                      ? "Updating..."
+                      : siteStatus?.isSiteOpen
+                        ? "Close Site"
+                        : "Open Site"
+                  }
+                >
+                  {isTogglingSite ? (
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current mr-1"></div>
+                  ) : siteStatus?.isSiteOpen ? (
+                    <FaCheck className="w-3 h-3" />
+                  ) : (
+                    <FaPowerOff className="w-3 h-3" />
+                  )}
+                  <span className="ml-1">
+                    {isTogglingSite
+                      ? "Updating..."
+                      : siteStatus?.isSiteOpen
+                        ? "Site Open"
+                        : "Site Closed"}
+                  </span>
+                </Button>
+              </div>
+            )}
+
+            {/* Referral Code Badge - Agents only */}
+            {isAgent && referralCode && (
+              <div className="flex-shrink-0 hidden sm:block">
+                <button
+                  onClick={copyReferralCode}
+                  className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg px-3 py-1.5 text-xs font-mono font-bold tracking-wider transition-all"
+                  title="Click to copy referral code"
+                >
+                  <FaShareAlt className="h-3 w-3" />
+                  <span>{referralCode}</span>
+                  {referralCopied ? (
+                    <FaCopy className="h-3 w-3 text-success" />
+                  ) : null}
+                </button>
+              </div>
+            )}
+
+            {/* Dark Mode Toggle */}
+            <div className="flex-shrink-0">
+              <DarkModeToggle />
+            </div>
+
+            {/* Notifications */}
+            <div className="flex-shrink-0">
+              <NotificationDropdown />
+            </div>
+
+            {/* User Menu */}
+            <div className="relative flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="p-1.5 text-white relative"
+                style={
+                  {
+                    "--hover-bg": "var(--color-primary-hover)",
+                  } as React.CSSProperties
+                }
+                aria-label="User menu"
+              >
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-primary to-[var(--color-primary-hover)] text-white flex items-center justify-center font-medium shadow-sm text-sm relative">
+                  {authState.user?.fullName.charAt(0)}
+                  {authState.user?.fullName.split(" ")[1]?.charAt(0) ?? ""}
+                  {/* Impersonation indicator dot */}
+                  {ImpersonationService.isImpersonating() && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-warning border-2 border-white rounded-full animate-pulse" title="Impersonating User"></div>
+                  )}
+                </div>
+              </Button>
+
+              {isDropdownOpen && (
+                <>
+                  <button
+                    aria-label="Close menu overlay"
+                    className="fixed inset-0 z-10 cursor-default border-0 bg-transparent"
+                    onClick={() => setIsDropdownOpen(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setIsDropdownOpen(false);
+                    }}
+                  />
+                  <div className="absolute right-0 mt-2 w-64 sm:w-72 bg-[var(--bg-surface)] rounded-lg shadow-xl py-1 z-20 border border-[var(--border-color)] max-h-96 overflow-y-auto">
+                    <div className="px-4 py-3 border-b border-[var(--border-color)]">
+                      <div className="font-medium text-sm truncate text-[var(--text-primary)]">
+                        {authState.user?.fullName}
+                      </div>
+                      <div className="text-xs text-[var(--text-muted)] truncate mt-0.5">
+                        {authState.user?.email}
+                      </div>
+                      {isAgent && referralCode && (
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-surface-alt)] px-2 py-0.5 text-xs font-mono font-bold text-[var(--color-primary)]">
+                            <FaShareAlt className="h-2.5 w-2.5" />
+                            {referralCode}
+                          </span>
+                        </div>
+                      )}
+                      {/* Impersonation Indicator */}
+                      {ImpersonationService.isImpersonating() && (
+                        <div className="mt-2 px-2 py-1 bg-warning/10 border border-warning/30 rounded-md">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-warning rounded-full animate-pulse"></div>
+                            <span className="text-xs font-medium text-warning">
+                              Impersonating User
+                            </span>
+                          </div>
+                          <div className="text-xs text-warning/80 mt-0.5">
+                            You are acting as another user
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Profile Link - Only for business users */}
+                    {canShowWallet && (
+                      <Link
+                        to="/agent/dashboard/profile"
+                        className="flex items-center px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <FaUser className="w-4 h-4 mr-3 text-[var(--text-muted)] flex-shrink-0" />
+                        <span className="truncate">My Profile</span>
+                      </Link>
+                    )}
+
+                    {/* AFA Registration - Only for business users */}
+                    {canShowWallet && (
+                      <Link
+                        to="/agent/dashboard/afa-registration"
+                        className="flex items-center px-4 py-3 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <svg
+                          className="w-4 h-4 mr-3 text-[var(--text-muted)] flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                          />
+                        </svg>
+                        <span className="truncate">AFA Registration</span>
+                      </Link>
+                    )}
+
+                    <div className="border-t border-[var(--border-color)] my-1"></div>
+
+                    {/* Return to Admin - Only when impersonating */}
+                    {ImpersonationService.isImpersonating() && (
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={handleReturnToAdmin}
+                        className="w-full justify-start mb-2 mx-2"
+                      >
+                        <FaSignOutAlt className="w-4 h-4 mr-3" />
+                        Return to Admin
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        logout();
+                      }}
+                      className="w-full justify-start text-error hover:bg-error/10 hover:text-error"
+                    >
+                      <FaSignOutAlt className="w-4 h-4 mr-3 text-error flex-shrink-0" />
+                      <span className="truncate">Logout</span>
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Wallet Section - Only for business users */}
+        {canShowWallet && (
+          <div className="wallet-balance mt-2">
+            <button
+              className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-2 sm:p-3 rounded-lg shadow-sm cursor-pointer hover:bg-white/15 transition-all duration-200 active:scale-95 appearance-none w-full"
+              onClick={() => {
+                refreshWallet();
+              }}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  refreshWallet();
+                }
+              }}
+              aria-label="Refresh wallet balance and spending data"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                  <div className="p-1.5 sm:p-2 bg-white/20 rounded-full flex-shrink-0">
+                    <FaWallet className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                      <span className="text-xs sm:text-sm font-medium text-white/80">
+                        Wallet Balance
+                      </span>
+                      <div className="hidden sm:flex items-center gap-1">
+                        {getConnectionStatusIndicator()}
+                        <span className="text-xs text-white/60">
+                          {getConnectionStatusText()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-base sm:text-lg lg:text-xl font-bold text-white text-left">
+                      {formatAmount(walletBalance)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vertical divider - hidden on very small screens */}
+                <div className="hidden sm:block w-px h-8 sm:h-12 bg-white/30 mx-4 sm:mx-6 flex-shrink-0"></div>
+
+                {/* Daily Spending Section */}
+                <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs sm:text-sm font-medium text-white/80 mb-1">
+                      Today's Spending
+                    </div>
+                    <div className="text-base sm:text-lg lg:text-xl font-bold text-white">
+                      {dailySpendingLoading || isLoading ? (
+                        <span> </span>
+                      ) : (
+                        formatAmount(dailySpending)
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};

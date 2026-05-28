@@ -1,0 +1,80 @@
+/* theme.css — Tailwind v4 @theme using Brytelinks design system CSS variables */
+
+@theme {
+  /* Map Brytelinks CSS variables to Tailwind utility classes */
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-active: var(--color-primary-active);
+
+  --color-secondary: var(--color-secondary);
+  --color-secondary-hover: var(--color-secondary-hover);
+  --color-secondary-active: var(--color-secondary-active);
+
+  --color-accent: var(--color-accent);
+  --color-accent-soft: var(--color-accent-soft);
+
+  --color-navy-dark: var(--color-navy-dark);
+  --color-navy: var(--color-navy);
+  --color-blue-mid: var(--color-blue-mid);
+
+  --color-bg-page: var(--bg-page);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-alt: var(--bg-surface-alt);
+  --color-bg-header: var(--bg-header);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-bg-sidebar-header: var(--bg-sidebar-header);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+
+  --color-border-color: var(--border-color);
+  --color-border-color-strong: var(--border-color-strong);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  --font-family-sans: var(--font-family);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-full);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-glow: var(--shadow-glow);
+}
+
+/* Legacy alias variables for backward compatibility */
+:root {
+  --color-primary-500: var(--color-primary);
+  --color-primary-600: var(--color-primary-hover);
+  --color-primary-700: var(--color-primary-active);
+  --color-secondary-500: var(--color-secondary);
+  --color-secondary-600: var(--color-secondary-hover);
+  --color-secondary-700: var(--color-secondary-active);
+  --color-mutedText: var(--text-muted);
+  --color-secondaryText: var(--text-secondary);
+  --color-border: var(--border-color);
+  --color-background: var(--bg-page);
+  --color-surface: var(--bg-surface);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-darkBase: var(--color-navy-dark);
+
+  --header-height: 4rem;
+  --sidebar-width: 16rem;
+  --sidebar-collapsed-width: 5rem;
+}

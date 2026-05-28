@@ -1,0 +1,129 @@
+@import "tailwindcss";
+@import "react-data-grid/lib/styles.css";
+@import "./design-system/theme.css";
+@import "./design-system/directdata-theme.css";
+
+/* Excel View Custom Styles */
+.rdg-light {
+  --rdg-color: #032d35;
+  --rdg-summary-border-color: #b8e8ef;
+  --rdg-border-color: #d4f0f5;
+  --rdg-summary-background-color: #f4fbfc;
+  --rdg-background-color: #ffffff;
+  --rdg-header-background-color: #032d35;
+  --rdg-row-hover-background-color: #e8f8fb;
+  --rdg-row-selected-background-color: #c2f7fd;
+  --rdg-row-selected-hover-background-color: #9df2fb;
+  --rdg-checkbox-color: #00c8e0;
+  --rdg-checkbox-focus-color: #0a7e8c;
+  --rdg-checkbox-disabled-color: #6a9aa3;
+  --rdg-selection-color: #00c8e0;
+  --rdg-font-size: 14px;
+}
+
+.rdg-light .rdg-header-row {
+  background-color: #032d35 !important;
+  font-weight: 600 !important;
+  color: #5de8f8 !important;
+  border-bottom: 2px solid #0a7e8c !important;
+}
+
+.rdg-light .rdg-cell {
+  border-right: 1px solid #d4f0f5 !important;
+  border-bottom: 1px solid #d4f0f5 !important;
+  padding: 8px 12px !important;
+}
+
+.rdg-light .rdg-row:hover {
+  background-color: #e8f8fb !important;
+}
+
+.rdg-light .rdg-cell:focus {
+  outline: 2px solid #00c8e0 !important;
+  outline-offset: -2px !important;
+}
+
+/* Apply smooth transitions to interactive elements */
+a, button, input, select, textarea {
+  transition: all 0.2s ease;
+}
+
+/* Header animations */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+.animate-slide-in-from-bottom {
+  animation: slide-in-from-bottom 0.5s ease-out;
+}
+
+/* Marquee animation for scrolling text */
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 10s linear infinite;
+  min-width: max-content;
+}
+
+/* Utility: hide scrollbar while keeping scroll behavior (mobile-friendly) */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Animation for notification dropdown */
+@keyframes notification-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.notification-dropdown {
+  animation: notification-fade-in 0.2s ease-out;
+}
