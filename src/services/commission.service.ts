@@ -6,6 +6,7 @@ import type {
   CommissionListResponse,
   WithdrawResponse,
   WithdrawalHistoryResponse,
+  Withdrawal,
   Commission,
 } from "../types/commission";
 
@@ -71,18 +72,7 @@ class CommissionService {
     return response.data.data;
   }
 
-  async getWithdrawalHistory(): Promise<
-    Array<{
-      _id: string;
-      user: string;
-      type: string;
-      amount: number;
-      balanceAfter: number;
-      description: string;
-      metadata: { type: string; commissionIds?: string[] };
-      createdAt: string;
-    }>
-  > {
+  async getWithdrawalHistory(): Promise<Withdrawal[]> {
     const response = await apiClient.get<WithdrawalHistoryResponse>(
       "/api/commissions/withdrawals"
     );
@@ -94,16 +84,7 @@ class CommissionService {
     page = 1,
     limit = 20,
   ): Promise<{
-    withdrawals: Array<{
-      _id: string;
-      user: string;
-      type: string;
-      amount: number;
-      balanceAfter: number;
-      description: string;
-      metadata: { type: string; commissionIds?: string[] };
-      createdAt: string;
-    }>;
+    withdrawals: Withdrawal[];
     pagination: { page: number; limit: number; total: number; pages: number };
   }> {
     const response = await apiClient.get<WithdrawalHistoryResponse>(
