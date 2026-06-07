@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AnalyticsActivityStage,
   AnalyticsBreakdownStage,
@@ -16,10 +16,7 @@ import {
   type TrendMetric,
 } from "../../components/analytics";
 import { Alert } from "../../design-system";
-import {
-  analyticsService,
-  type AnalyticsData,
-} from "../../services/analytics.service";
+import { useSuperAdminAnalytics } from "../../hooks/use-analytics";
 import {
   FaMoneyBillWave,
   FaShoppingCart,
@@ -60,60 +57,12 @@ export default function SuperAdminAnalyticsPage() {
   const [timeframe, setTimeframe] = useState("30d");
   const [performanceTimeframe, setPerformanceTimeframe] = useState("7d");
   const [selectedMetric, setSelectedMetric] = useState<TrendMetric>("revenue");
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [performanceLoading, setPerformanceLoading] = useState(false);
-  const [data, setData] = useState<AnalyticsData | null>(null);
-  const [performanceData, setPerformanceData] = useState<
-    AnalyticsData["topPerformers"] | null
-  >(null);
-  const [error, setError] = useState<string | null>(null);
 
-  const loadAnalytics = useCallback(
-    async (showLoader = true) => {
-      try {
-        if (showLoader) {
-          setLoading(true);
-        } else {
-          setRefreshing(true);
-        }
+  const { data, isLoading: loading, isFetching: refreshing, isError, error: fetchError, refetch } = useSuperAdminAnalytics(timeframe);
+  const { data: perfData, isLoading: performanceLoading } = useSuperAdminAnalytics(performanceTimeframe);
 
-        setError(null);
-        const analytics =
-          await analyticsService.getSuperAdminAnalytics(timeframe);
-        setData(analytics);
-      } catch {
-        setError("Failed to load analytics data.");
-      } finally {
-        if (showLoader) {
-          setLoading(false);
-        }
-        setRefreshing(false);
-      }
-    },
-    [timeframe],
-  );
-
-  useEffect(() => {
-    void loadAnalytics(true);
-  }, [loadAnalytics]);
-
-  const loadPerformanceData = useCallback(async () => {
-    try {
-      setPerformanceLoading(true);
-      const analytics =
-        await analyticsService.getSuperAdminAnalytics(performanceTimeframe);
-      setPerformanceData(analytics.topPerformers || null);
-    } catch {
-      setPerformanceData(null);
-    } finally {
-      setPerformanceLoading(false);
-    }
-  }, [performanceTimeframe]);
-
-  useEffect(() => {
-    void loadPerformanceData();
-  }, [loadPerformanceData]);
+  const error = isError ? (fetchError instanceof Error ? fetchError.message : "Failed to load analytics data.") : null;
+  const performanceData = perfData?.topPerformers || null;
 
   const handleExport = () => {
     if (!data) return;
@@ -318,8 +267,7 @@ export default function SuperAdminAnalyticsPage() {
         timeOptions={timeOptions}
         onTimeframeChange={setTimeframe}
         onRefresh={() => {
-          void loadAnalytics(false);
-          void loadPerformanceData();
+          void refetch();
         }}
         onExport={handleExport}
         loading={loading || refreshing}

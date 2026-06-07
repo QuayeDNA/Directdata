@@ -90,6 +90,37 @@ class CommissionService {
     return Array.isArray(withdrawals) ? withdrawals : [];
   }
 
+  async getWithdrawalHistoryPaginated(
+    page = 1,
+    limit = 20,
+  ): Promise<{
+    withdrawals: Array<{
+      _id: string;
+      user: string;
+      type: string;
+      amount: number;
+      balanceAfter: number;
+      description: string;
+      metadata: { type: string; commissionIds?: string[] };
+      createdAt: string;
+    }>;
+    pagination: { page: number; limit: number; total: number; pages: number };
+  }> {
+    const response = await apiClient.get<WithdrawalHistoryResponse>(
+      `/api/commissions/withdrawals?page=${page}&limit=${limit}`,
+    );
+    const r = response.data.data;
+    return {
+      withdrawals: Array.isArray(r.withdrawals) ? r.withdrawals : [],
+      pagination: {
+        page: r.pagination?.page ?? 1,
+        limit: r.pagination?.limit ?? 20,
+        total: r.pagination?.total ?? 0,
+        pages: r.pagination?.totalPages ?? 0,
+      },
+    };
+  }
+
   async processDailyBatch(): Promise<{
     success: boolean;
     message: string;

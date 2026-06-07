@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { commissionService } from "../../../services/commission.service";
 import { referralService } from "../../../services/referral.service";
 import { FaWallet, FaShareAlt } from "react-icons/fa";
@@ -14,12 +14,12 @@ import { WithdrawForm } from "./withdraw-form";
 import { CommissionHistory } from "./commission-history";
 import { WithdrawalHistory } from "./withdrawal-history";
 import { ReferralTree } from "./referral-tree";
-import type { Commission, CommissionStats, WithdrawResponse, Withdrawal } from "../../../types/commission";
+import type { Commission, WithdrawResponse, Withdrawal } from "../../../types/commission";
 import type { ReferralDashboard, ReferralTreeNode } from "../../../types/referral";
+import { useAgentAnalytics, useInvalidateAnalytics } from "../../../hooks/use-analytics";
 
 export const CommissionPage = () => {
   const [balance, setBalance] = useState<number>(0);
-  const [stats, setStats] = useState<CommissionStats | null>(null);
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +29,16 @@ export const CommissionPage = () => {
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("commission");
 
+  const { data: agentAnalytics } = useAgentAnalytics("30d");
+  const { invalidateAll } = useInvalidateAnalytics();
+
+  const analyticsCommissions = useMemo(() => ({
+    totalEarned: agentAnalytics?.commissions?.totalEarned || 0,
+    creditedCount: agentAnalytics?.commissions?.creditedCount || 0,
+    totalWithdrawn: agentAnalytics?.commissions?.totalWithdrawn || 0,
+    walletBalance: agentAnalytics?.wallet?.balance || 0,
+  }), [agentAnalytics]);
+
   const [dashboard, setDashboard] = useState<ReferralDashboard | null>(null);
   const [tree, setTree] = useState<ReferralTreeNode[]>([]);
   const treeFetchedRef = useRef(false);
@@ -36,15 +46,13 @@ export const CommissionPage = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [bal, stat, comms, wds, dash] = await Promise.all([
+      const [bal, comms, wds, dash] = await Promise.all([
         commissionService.getBalance(),
-        commissionService.getStats(),
         commissionService.getCommissions(),
         commissionService.getWithdrawalHistory(),
         referralService.getDashboard(),
       ]);
       setBalance(bal);
-      setStats(stat);
       setCommissions(comms);
       setWithdrawals(wds);
       setDashboard(dash);
@@ -78,6 +86,7 @@ export const CommissionPage = () => {
       setWithdrawResult(result);
       setBalance(result.commissionBalance);
       setWithdrawAmount("");
+      invalidateAll();
       fetchAll();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string };
@@ -100,14 +109,9 @@ export const CommissionPage = () => {
 
   const commissionStatCards: StatCardProps[] = [
     { title: "Available Balance", value: `GHS ${balance.toFixed(2)}`, subtitle: "Ready to withdraw", icon: <FaWallet />, size: "md" },
+    { title: "Total Earned", value: `GHS ${analyticsCommissions.totalEarned.toFixed(2)}`, subtitle: `${analyticsCommissions.creditedCount} credited`, icon: <FaWallet />, size: "md" },
+    { title: "Total Withdrawn", value: `GHS ${analyticsCommissions.totalWithdrawn.toFixed(2)}`, subtitle: "Lifetime withdrawals", icon: <FaWallet />, size: "md" },
   ];
-
-  if (stats) {
-    commissionStatCards.push(
-      { title: "Total Earned", value: `GHS ${(stats.totalCommissions || 0).toFixed(2)}`, subtitle: `${stats.creditedCount || 0} credited · ${stats.pendingCount || 0} pending`, icon: <FaWallet />, size: "md" },
-      { title: "Daily Average", value: `GHS ${(stats.totalEarned || 0).toFixed(2)}`, subtitle: "Total credited", icon: <FaWallet />, size: "md" },
-    );
-  }
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
@@ -135,7 +139,7 @@ export const CommissionPage = () => {
         </TabsList>
 
         <TabsContent value="commission" className="space-y-4 pt-4">
-          {stats && <StatsGrid stats={commissionStatCards} columns={3} gap="md" />}
+          <StatsGrid stats={commissionStatCards} columns={3} gap="md" />
 
           <WithdrawForm
             balance={balance}
