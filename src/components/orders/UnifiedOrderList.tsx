@@ -1,5 +1,5 @@
 // src/components/orders/UnifiedOrderList.tsx
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useOrder } from "../../hooks/use-order";
 import { useAuth } from "../../hooks/use-auth";
@@ -114,7 +114,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
   const analyticsError = isAdmin ? (adminAnalyticsError ? "Failed to load analytics" : null) : (agentAnalyticsError ? "Failed to load analytics" : null);
 
   // Transform analytics data to match OrderAnalytics props shape
-  const analyticsData = useMemo(() => {
+  const analyticsData = React.useMemo(() => {
     if (isAdmin && adminAnalytics) {
       const a = adminAnalytics;
       return {
@@ -670,8 +670,8 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
     return (
       <Card>
         <CardBody>
-          <div className="bg-[var(--error-lighter)] border border-[var(--error)]/20 rounded-lg">
-            <p className="text-[var(--error)]">
+          <div className="bg-(--error-lighter) border border-(--error)/20 rounded-lg">
+            <p className="text-(--error)">
               Error:{" "}
               {activeTab === "reported"
                 ? "Failed to load reported orders"
@@ -691,14 +691,14 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
         <CardBody>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold mb-2 text-[var(--text-primary)]">
+              <h1 className="text-2xl font-bold mb-2 text-(--text-primary)">
                 {isAdmin
                   ? "Order Management"
                   : isAgent
                     ? "Agent Orders"
                     : "My Orders"}
               </h1>
-              <p className="text-[var(--text-secondary)]">
+              <p className="text-(--text-secondary)">
                 {isAdmin
                   ? "Monitor and manage all platform orders"
                   : isAgent
@@ -736,16 +736,16 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       )}
       {/* Draft Orders Notification - Only show for agents when there are draft orders */}
       {(isAgent || !isAdmin) && hasDraftOrders && (
-        <Card className="border-[var(--warning)] bg-[var(--warning-lighter)]">
+        <Card className="border-(--warning) bg-(--warning-lighter)">
           <CardBody>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-start gap-3">
-                <FaExclamationTriangle className="text-[var(--warning)] text-xl flex-shrink-0 mt-0.5" />
+                <FaExclamationTriangle className="text-(--warning) text-xl shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-[var(--warning)] mb-1">
+                  <h3 className="font-semibold text-(--warning) mb-1">
                     Draft Orders Need Attention
                   </h3>
-                  <p className="text-[var(--warning)] text-sm">
+                  <p className="text-(--warning) text-sm">
                     You have {draftOrders.length} draft order
                     {draftOrders.length !== 1 ? "s" : ""} waiting to be
                     processed. These orders require sufficient wallet balance to
@@ -776,18 +776,18 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {/* View Mode Section */}
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[var(--text-secondary)] flex-shrink-0">
+              <span className="text-sm font-medium text-(--text-secondary) shrink-0">
                 View Mode:
               </span>
-              <div className="flex bg-[var(--bg-surface-alt)] rounded-lg p-1">
+              <div className="flex bg-(--bg-surface-alt) rounded-lg p-1">
                 {(["cards", "table"] as const).map((mode) => (
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
                     className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                       viewMode === mode
-                        ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm"
-                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                        ? "bg-(--bg-surface) text-(--text-primary) shadow-sm"
+                        : "text-(--text-muted) hover:text-(--text-primary)"
                     }`}
                   >
                     {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -798,8 +798,8 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     onClick={() => setViewMode("excel")}
                     className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                       viewMode === "excel"
-                        ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm"
-                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                        ? "bg-(--bg-surface) text-(--text-primary) shadow-sm"
+                        : "text-(--text-muted) hover:text-(--text-primary)"
                     }`}
                   >
                     Excel
@@ -830,10 +830,10 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                       size="sm"
                       onClick={handleDeselectAll}
                     >
-                      <FaTimes className="mr-1 text-[var(--text-muted)]" />
+                      <FaTimes className="mr-1 text-(--text-muted)" />
                       Deselect All
                     </Button>
-                    <span className="text-sm text-[var(--text-muted)] flex-shrink-0">
+                    <span className="text-sm text-(--text-muted) shrink-0">
                       {selectedOrders.length} selected
                     </span>
                   </>
@@ -849,9 +849,9 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
         activeTab !== "reported" && (
           <Card>
             <CardBody>
-              <div className="rounded-lg p-4 border border-[var(--color-secondary)]/20 bg-[var(--color-accent-soft)]">
+              <div className="rounded-lg p-4 border border-secondary/20 bg-accent-soft">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <span className="text-sm font-medium text-[var(--text-primary)]">
+                  <span className="text-sm font-medium text-(--text-primary)">
                     {selectedOrders.length} order(s) selected for bulk
                     processing
                   </span>
@@ -898,9 +898,9 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       {selectedOrders.length > 0 && isAdmin && activeTab === "reported" && (
         <Card>
           <CardBody>
-            <div className="bg-[var(--bg-surface-alt)] border border-[var(--border-color-strong)] rounded-lg p-4">
+            <div className="bg-(--bg-surface-alt) border border-(--border-color-strong) rounded-lg p-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <span className="text-sm text-[var(--text-primary)] font-medium">
+                <span className="text-sm text-(--text-primary) font-medium">
                   {selectedOrders.length} order(s) selected for reception status
                   update
                 </span>
@@ -909,7 +909,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => handleBulkReceptionStatus("received")}
-                    className="flex-1 sm:flex-none border-[var(--success)]/30 text-[var(--success)] hover:bg-[var(--success-lighter)]"
+                    className="flex-1 sm:flex-none border-(--success)/30 text-(--success) hover:bg-(--success-lighter)"
                   >
                     <FaCheck className="mr-1" />
                     <span className="hidden sm:inline">Mark Received</span>
@@ -919,7 +919,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => handleBulkReceptionStatus("checking")}
-                    className="flex-1 sm:flex-none border-[var(--warning)]/30 text-[var(--warning)] hover:bg-[var(--warning-lighter)]"
+                    className="flex-1 sm:flex-none border-(--warning)/30 text-(--warning) hover:bg-(--warning-lighter)"
                   >
                     <FaClock className="mr-1" />
                     <span className="hidden sm:inline">Mark Checking</span>
@@ -929,7 +929,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => handleBulkReceptionStatus("resolved")}
-                    className="flex-1 sm:flex-none border-[var(--color-secondary)]/30 text-[var(--color-secondary)] hover:bg-[var(--color-accent-soft)]"
+                    className="flex-1 sm:flex-none border-secondary/30 text-secondary hover:bg-accent-soft"
                   >
                     <FaCheck className="mr-1" />
                     <span className="hidden sm:inline">Mark Resolved</span>
@@ -945,13 +945,13 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       {(isAdmin || isAgent) && (
         <Card>
           <CardBody>
-            <div className="flex border-b border-[var(--border-color)]">
+            <div className="flex border-b border-(--border-color)">
               <button
                 onClick={() => setActiveTab("all")}
                 className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === "all"
-                    ? "border-[var(--color-secondary)] text-[var(--color-secondary)]"
-                    : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)]"
+                    ? "border-secondary text-secondary"
+                    : "border-transparent text-(--text-muted) hover:text-(--text-primary) hover:border-(--border-color)"
                 }`}
               >
                 All Orders
