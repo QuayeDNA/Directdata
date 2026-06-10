@@ -217,7 +217,7 @@ export default function SuperAdminSettingsPage() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-[240px] flex items-center justify-center">
+      <div className="min-h-60 flex items-center justify-center">
         <Spinner size="lg" color="primary" />
       </div>
     );
@@ -261,7 +261,7 @@ export default function SuperAdminSettingsPage() {
                       <span className="text-sm font-medium" style={{ color: siteOpen ? 'var(--success)' : 'var(--error)' }}>{siteOpen ? 'Open' : 'Closed'}</span>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" checked={siteOpen} onChange={handleToggleSite} disabled={!!busyKeys['siteToggle']} />
-                        <div className="w-10 h-5 bg-[var(--bg-muted)] rounded-full peer-checked:bg-[var(--color-primary)] relative transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--text-inverse)] after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
+                        <div className="w-10 h-5 bg-(--bg-muted) rounded-full peer-checked:bg-primary relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-(--text-inverse) after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
                       </label>
                     </div>
                   </div>
@@ -297,7 +297,7 @@ export default function SuperAdminSettingsPage() {
                       </span>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" checked={storefrontsOpen} onChange={handleToggleStorefronts} disabled={!!busyKeys['storefrontsToggle']} />
-                        <div className="w-10 h-5 bg-[var(--bg-muted)] rounded-full peer-checked:bg-[var(--color-primary)] relative transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--text-inverse)] after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
+                        <div className="w-10 h-5 bg-(--bg-muted) rounded-full peer-checked:bg-primary relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-(--text-inverse) after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
                       </label>
                     </div>
                   </div>
@@ -309,7 +309,7 @@ export default function SuperAdminSettingsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={signupRequired} onChange={handleToggleSignupApproval} disabled={!!busyKeys['signupToggle']} />
-                      <div className="w-10 h-5 bg-[var(--bg-muted)] rounded-full peer-checked:bg-[var(--color-primary)] relative transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--text-inverse)] after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
+                      <div className="w-10 h-5 bg-(--bg-muted) rounded-full peer-checked:bg-primary relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-(--text-inverse) after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
                     </label>
                   </div>
 
@@ -320,7 +320,7 @@ export default function SuperAdminSettingsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={autoApprove} onChange={handleToggleAutoApprove} disabled={!!busyKeys['autoApproveToggle']} />
-                      <div className="w-10 h-5 bg-[var(--bg-muted)] rounded-full peer-checked:bg-[var(--color-primary)] relative transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--text-inverse)] after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
+                      <div className="w-10 h-5 bg-(--bg-muted) rounded-full peer-checked:bg-primary relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-(--text-inverse) after:w-4 after:h-4 after:rounded-full after:transition-transform peer-checked:after:translate-x-5"></div>
                     </label>
                   </div>
                 </div>
