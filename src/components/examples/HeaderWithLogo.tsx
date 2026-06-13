@@ -1,4 +1,3 @@
-import React from 'react';
 import { DirectDataSvgLogoCompact } from '../common';
 
 /**

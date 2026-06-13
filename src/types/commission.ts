@@ -1,22 +1,18 @@
+export type CommissionStatus = "pending" | "credited" | "cancelled";
+
 export interface PopulatedUser {
   _id: string;
   fullName: string;
   email: string;
-  phone?: string;
   agentCode?: string;
-  userType?: string;
-  referralCode?: string;
 }
-
-export type CommissionStatus = "pending" | "paid" | "cancelled" | "credited";
 
 export interface Commission {
   _id: string;
   referrer: string | PopulatedUser;
   date: string;
   amount: number;
-  commissionRate: number;
-  rate?: number;
+  rate: number;
   batchTotal: number;
   ordersCount: number;
   qualifiedUsersCount: number;

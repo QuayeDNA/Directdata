@@ -49,6 +49,8 @@ export { Container } from "./components/container";
 export { Image, HeroImage } from "./components/image";
 export { Section, SectionHeader } from "./components/section";
 export { Testimonial, Avatar } from "./components/testimonial";
+export { EmptyState } from "./components/empty-state";
+export { ErrorState } from "./components/error-state";
 
 // Export theme provider and types
 export { ThemeProvider } from "../contexts/theme-context";

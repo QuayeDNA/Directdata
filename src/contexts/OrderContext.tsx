@@ -135,8 +135,6 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({
     limit: 50,
   });
   const [filters, setFilters] = useState<OrderFilters>({});
-
-
   // Reported orders state
   const [reportedOrders, setReportedOrders] = useState<Order[]>([]);
   const [reportedLoading, setReportedLoading] = useState(false);

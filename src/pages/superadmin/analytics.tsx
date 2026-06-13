@@ -58,11 +58,21 @@ export default function SuperAdminAnalyticsPage() {
   const [performanceTimeframe, setPerformanceTimeframe] = useState("7d");
   const [selectedMetric, setSelectedMetric] = useState<TrendMetric>("revenue");
 
-  const { data, isLoading: loading, isFetching: refreshing, isError, error: fetchError, refetch } = useSuperAdminAnalytics(timeframe);
-  const { data: perfData, isLoading: performanceLoading } = useSuperAdminAnalytics(performanceTimeframe);
+  const {
+    data,
+    isLoading: loading,
+    isFetching: refreshing,
+    error,
+    refetch: refetchAdmin,
+  } = useSuperAdminAnalytics(timeframe);
 
-  const error = isError ? (fetchError instanceof Error ? fetchError.message : "Failed to load analytics data.") : null;
-  const performanceData = perfData?.topPerformers || null;
+  const {
+    data: perfFull,
+    isLoading: performanceLoading,
+    refetch: refetchPerformance,
+  } = useSuperAdminAnalytics(performanceTimeframe);
+
+  const performanceData = perfFull?.topPerformers ?? null;
 
   const handleExport = () => {
     if (!data) return;
@@ -267,7 +277,8 @@ export default function SuperAdminAnalyticsPage() {
         timeOptions={timeOptions}
         onTimeframeChange={setTimeframe}
         onRefresh={() => {
-          void refetch();
+          refetchAdmin();
+          refetchPerformance();
         }}
         onExport={handleExport}
         loading={loading || refreshing}
@@ -282,7 +293,7 @@ export default function SuperAdminAnalyticsPage() {
           variant="left-accent"
           title="Unable to load analytics"
         >
-          {error}
+          {error.message}
         </Alert>
       ) : null}
 

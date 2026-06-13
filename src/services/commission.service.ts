@@ -6,16 +6,16 @@ import type {
   CommissionListResponse,
   WithdrawResponse,
   WithdrawalHistoryResponse,
-  Withdrawal,
   Commission,
+  Withdrawal,
 } from "../types/commission";
 
 class CommissionService {
-  async getBalance(): Promise<number> {
+  async getBalance(): Promise<{ commissionBalance: number; walletBalance: number }> {
     const response = await apiClient.get<CommissionBalanceResponse>(
       "/api/commissions/balance"
     );
-    return response.data.data.commissionBalance;
+    return response.data.data;
   }
 
   async getStats(): Promise<CommissionStats> {
@@ -81,23 +81,22 @@ class CommissionService {
   }
 
   async getWithdrawalHistoryPaginated(
-    page = 1,
-    limit = 20,
+    page = 1, limit = 20
   ): Promise<{
     withdrawals: Withdrawal[];
     pagination: { page: number; limit: number; total: number; pages: number };
   }> {
     const response = await apiClient.get<WithdrawalHistoryResponse>(
-      `/api/commissions/withdrawals?page=${page}&limit=${limit}`,
+      `/api/commissions/withdrawals?page=${page}&limit=${limit}`
     );
-    const r = response.data.data;
+    const bp = response.data.data.pagination;
     return {
-      withdrawals: Array.isArray(r.withdrawals) ? r.withdrawals : [],
+      withdrawals: Array.isArray(response.data.data.withdrawals) ? response.data.data.withdrawals : [],
       pagination: {
-        page: r.pagination?.page ?? 1,
-        limit: r.pagination?.limit ?? 20,
-        total: r.pagination?.total ?? 0,
-        pages: r.pagination?.totalPages ?? 0,
+        page: bp?.page ?? 1,
+        limit: bp?.limit ?? limit,
+        total: bp?.total ?? 0,
+        pages: bp?.totalPages ?? 0,
       },
     };
   }

@@ -143,7 +143,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   }, [logout, onClose]);
 
   /* Derived values */
-  const appName    = authState.user?.businessName || "DirectData";
+  const appName    = authState.user?.businessName || "SaaS Telecom";
   const initials   = getInitials(authState.user?.fullName ?? "");
   const userRole   = authState.user?.userType ?? "User";
   const agentCode  = isAgent(authState.user?.userType) ? (authState.user?.agentCode ?? null) : null;
@@ -234,7 +234,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           {/* Brand */}
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <DirectDataSvgIcon className="h-9 w-9 flex-shrink-0" />
-            <span className="truncate text-[15px] font-bold tracking-tight text-[var(--sb-text-primary)]">
+            <span className="text-[15px] font-bold leading-tight">
               DirectData
             </span>
           </div>

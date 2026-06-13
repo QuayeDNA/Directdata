@@ -103,7 +103,7 @@ export const TopUpRequestModal: React.FC<Props> = ({ isOpen, onClose, onSubmit, 
   const [minimumAmount, setMinimumAmount] = useState(10);
   const [paystackMinimum, setPaystackMinimum] = useState(0);
   const [paystackEnabled, setPaystackEnabled] = useState(false);
-  const [paystackPublicKey, setPaystackPublicKey] = useState<string | null>(null);
+  const [_paystackPublicKey, setPaystackPublicKey] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paystack'>('paystack');
 
   const [checkingPending, setCheckingPending] = useState(false);

@@ -1,8 +1,8 @@
 /**
  * getStoreUrl — returns the public-facing URL for a storefront.
  *
- * On the consolidated domain (directdata.com) stores live at:
- *   directdata.com/store/:businessName
+ * On the consolidated domain (brytelinks.com) stores live at:
+ *   brytelinks.com/store/:businessName
  *
  * VITE_STORE_ONLY is kept for any legacy standalone deployments but
  * is no longer used in the main production build.
@@ -17,6 +17,6 @@ export function getStoreUrl(businessName: string): string {
     return `${baseUrl}/${businessName}`;
   }
 
-  // Consolidated domain: directdata.com/store/:businessName
+  // Consolidated domain: brytelinks.com/store/:businessName
   return `${window.location.origin}/store/${businessName}`;
 }

@@ -1,4 +1,4 @@
-const APP_DOMAIN = "directdata.shop";
+const APP_DOMAIN = "brytelinks.com";
 
 export function getPaystackEmail(phone: string): string {
   const digits = phone.replace(/\D/g, "");

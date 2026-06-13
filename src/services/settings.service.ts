@@ -1,4 +1,5 @@
 import { apiClient, publicApiClient } from "../utils/api-client";
+import type { UserType } from "../types/auth";
 
 // =============================================================================
 // TYPES
@@ -47,6 +48,8 @@ export interface WalletSettings {
     super_agent: number;
     dealer: number;
     super_dealer: number;
+    elite_dealer: number;
+    master_dealer: number;
     default: number;
   };
   /** Global minimum applied specifically to Paystack instant top-ups */
@@ -87,13 +90,14 @@ export interface PasswordResetRequest {
 
 export interface RoleChangeRequest {
   userId: string;
-  newRole:
-    | "agent"
-    | "super_agent"
-    | "dealer"
-    | "super_dealer"
-    | "admin"
-    | "super_admin";
+  newRole: UserType | "admin" | "super_admin";
+}
+
+export interface BryteLinksSettings {
+  requirePaymentForStorefrontCreation: boolean;
+  storefrontCreationFee: number;
+  autoSuspendInactiveStores: boolean;
+  inactivityThresholdDays: number;
 }
 
 // =============================================================================
@@ -248,6 +252,20 @@ class SettingsService {
     return response.data.data ?? response.data;
   }
 
+  // BryteLinks — Storefront Payment Gate & Auto-Suspend Settings
+  async getBryteLinksSettings(): Promise<BryteLinksSettings> {
+    const response = await apiClient.get("/api/settings/brytelinks");
+    return response.data.data ?? response.data;
+  }
+
+  async updateBryteLinksSettings(
+    settings: Partial<BryteLinksSettings>
+  ): Promise<BryteLinksSettings> {
+    const response = await apiClient.put("/api/settings/brytelinks", settings);
+    this._allSettingsCache = null;
+    return response.data.data ?? response.data;
+  }
+
   /**
    * Combined fetch used by the Settings page — cached client‑side for a short TTL
    * reduces duplicate network calls when the page remounts or dialogs re-open.
@@ -257,6 +275,7 @@ class SettingsService {
     apiSettings: ApiSettings;
     walletSettings: WalletSettings;
     feeSettings: FeeSettings;
+    bryteLinksSettings: BryteLinksSettings;
     signupApproval: { requireApprovalForSignup: boolean };
     autoApproveStorefronts: { autoApproveStorefronts: boolean };
     systemInfo: SystemInfo;
@@ -266,17 +285,18 @@ class SettingsService {
       return this._allSettingsCache.data;
     }
 
-    const [siteSettings, apiSettings, walletSettings, feeSettings, signupApproval, autoApproveStorefronts, systemInfo] = await Promise.all([
+    const [siteSettings, apiSettings, walletSettings, feeSettings, bryteLinksSettings, signupApproval, autoApproveStorefronts, systemInfo] = await Promise.all([
       this.getSiteSettings(),
       this.getApiSettings(),
       this.getWalletSettings(),
       this.getFeeSettings(),
+      this.getBryteLinksSettings(),
       this.getSignupApprovalSetting(),
       this.getAutoApproveStorefronts(),
       this.getSystemInfo(),
     ]);
 
-    const combined = { siteSettings, apiSettings, walletSettings, feeSettings, signupApproval, autoApproveStorefronts, systemInfo };
+    const combined = { siteSettings, apiSettings, walletSettings, feeSettings, bryteLinksSettings, signupApproval, autoApproveStorefronts, systemInfo };
     this._allSettingsCache = { ts: Date.now(), data: combined };
     return combined;
   }

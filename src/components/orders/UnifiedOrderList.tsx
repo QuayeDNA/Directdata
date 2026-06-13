@@ -1,11 +1,11 @@
 // src/components/orders/UnifiedOrderList.tsx
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useOrder } from "../../hooks/use-order";
 import { useAuth } from "../../hooks/use-auth";
 import { providerService } from "../../services/provider.service";
+import { useAgentAnalytics, useSuperAdminAnalytics, useInvalidateAnalytics } from "../../hooks/use-analytics";
 import { websocketService } from "../../services/websocket.service";
-import { useSuperAdminAnalytics, useAgentAnalytics, useInvalidateAnalytics } from "../../hooks/use-analytics";
 import {
   Button,
   Card,
@@ -105,73 +105,13 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
   // Smart select dialog state
   const [showSmartSelectDialog, setShowSmartSelectDialog] = useState(false);
 
-  // Analytics via React Query (auth-gated to prevent 403)
-  const { data: adminAnalytics, isLoading: adminAnalyticsLoading, isError: adminAnalyticsError } = useSuperAdminAnalytics("30d", !!isAdmin);
-  const { data: agentAnalyticsRaw, isLoading: agentAnalyticsLoading, isError: agentAnalyticsError } = useAgentAnalytics("30d", !!isAgent);
+  // Analytics via React Query — only fetch the hook matching the user's role
+  const { data: agentAnalytics, isLoading: agentAnalyticsLoading, error: agentAnalyticsError } = useAgentAnalytics("30d", !!isAgent);
+  const { data: adminAnalytics, isLoading: adminAnalyticsLoading, error: adminAnalyticsError } = useSuperAdminAnalytics("30d", !!isAdmin);
   const { invalidateAll } = useInvalidateAnalytics();
 
-  const analyticsLoading = isAdmin ? adminAnalyticsLoading : agentAnalyticsLoading;
-  const analyticsError = isAdmin ? (adminAnalyticsError ? "Failed to load analytics" : null) : (agentAnalyticsError ? "Failed to load analytics" : null);
-
-  // Transform analytics data to match OrderAnalytics props shape
-  const analyticsData = React.useMemo(() => {
-    if (isAdmin && adminAnalytics) {
-      const a = adminAnalytics;
-      return {
-        totalOrders: a.orders?.total || 0,
-        todayOrders: a.orders?.today?.total || 0,
-        thisMonthOrders: a.orders?.thisMonth?.total || 0,
-        totalRevenue: a.revenue?.total || 0,
-        todayRevenue: a.revenue?.today || 0,
-        monthlyRevenue: a.revenue?.thisMonth || 0,
-        todayCompletedOrders: a.orders?.today?.completed || 0,
-        todayProcessingOrders: a.orders?.today?.processing || 0,
-        todayPendingOrders: a.orders?.today?.pending || 0,
-        todayCancelledOrders: a.orders?.today?.cancelled || 0,
-        statusCounts: {
-          processing: a.orders?.processing || 0,
-          pending: a.orders?.pending || 0,
-          confirmed: a.orders?.confirmed || 0,
-          cancelled: a.orders?.cancelled || 0,
-          partiallyCompleted: a.orders?.partiallyCompleted || 0,
-        },
-        receptionCounts: {
-          received: a.orders?.completed || 0,
-          not_received: a.orders?.failed || 0,
-          checking: a.orders?.processing || 0,
-          resolved: a.orders?.completed || 0,
-        },
-      };
-    }
-    if (isAgent && agentAnalyticsRaw) {
-      const a = agentAnalyticsRaw;
-      return {
-        orders: {
-          total: a.orders?.total || 0,
-          completed: a.orders?.completed || 0,
-          processing: a.orders?.processing || 0,
-          pending: a.orders?.pending || 0,
-          confirmed: a.orders?.confirmed || 0,
-          cancelled: a.orders?.cancelled || 0,
-          partiallyCompleted: a.orders?.partiallyCompleted || 0,
-          today: {
-            completed: a.orders?.todayCounts?.completed || 0,
-            processing: a.orders?.todayCounts?.processing || 0,
-            pending: a.orders?.todayCounts?.pending || 0,
-            confirmed: a.orders?.todayCounts?.confirmed || 0,
-            cancelled: a.orders?.todayCounts?.cancelled || 0,
-            partiallyCompleted: a.orders?.todayCounts?.partiallyCompleted || 0,
-          },
-        },
-        revenue: {
-          total: a.revenue?.total || 0,
-          thisMonth: a.revenue?.thisMonth || 0,
-          today: a.revenue?.today || 0,
-        },
-      };
-    }
-    return null;
-  }, [isAdmin, adminAnalytics, isAgent, agentAnalyticsRaw]);
+  const analyticsLoading = isAdmin ? adminAnalyticsLoading : isAgent ? agentAnalyticsLoading : false;
+  const analyticsError = isAdmin ? (adminAnalyticsError?.message ?? null) : isAgent ? (agentAnalyticsError?.message ?? null) : null;
 
   // Provider data
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -206,6 +146,65 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       console.error("Failed to fetch providers:", error);
     }
   }, []);
+
+  // Derive analytics data from React Query based on role
+  const analyticsData = useMemo(() => {
+    if (isAdmin && adminAnalytics) {
+      return {
+        totalOrders: adminAnalytics.orders.total || 0,
+        todayOrders: adminAnalytics.orders.today?.total || 0,
+        thisMonthOrders: adminAnalytics.orders.thisMonth?.total || 0,
+        totalRevenue: adminAnalytics.revenue.total || 0,
+        todayRevenue: adminAnalytics.revenue.today || 0,
+        monthlyRevenue: adminAnalytics.revenue.thisMonth || 0,
+        todayCompletedOrders: adminAnalytics.orders.today?.completed || 0,
+        todayProcessingOrders: adminAnalytics.orders.today?.processing || 0,
+        todayPendingOrders: adminAnalytics.orders.today?.pending || 0,
+        todayCancelledOrders: adminAnalytics.orders.today?.cancelled || 0,
+        statusCounts: {
+          processing: adminAnalytics.orders.processing || 0,
+          pending: adminAnalytics.orders.pending || 0,
+          confirmed: adminAnalytics.orders.confirmed || 0,
+          cancelled: adminAnalytics.orders.cancelled || 0,
+          partiallyCompleted: adminAnalytics.orders.partiallyCompleted || 0,
+        },
+        receptionCounts: {
+          received: adminAnalytics.orders.completed || 0,
+          not_received: adminAnalytics.orders.failed || 0,
+          checking: adminAnalytics.orders.processing || 0,
+          resolved: adminAnalytics.orders.completed || 0,
+        },
+      };
+    }
+    if (isAgent && agentAnalytics) {
+      return {
+        orders: {
+          total: agentAnalytics.orders.total || 0,
+          completed: agentAnalytics.orders.completed || 0,
+          processing: agentAnalytics.orders.processing || 0,
+          pending: agentAnalytics.orders.pending || 0,
+          confirmed: agentAnalytics.orders.confirmed || 0,
+          cancelled: agentAnalytics.orders.cancelled || 0,
+          partiallyCompleted: agentAnalytics.orders.partiallyCompleted || 0,
+          today: {
+            completed: agentAnalytics.orders.todayCounts?.completed || 0,
+            processing: agentAnalytics.orders.todayCounts?.processing || 0,
+            pending: agentAnalytics.orders.todayCounts?.pending || 0,
+            confirmed: agentAnalytics.orders.todayCounts?.confirmed || 0,
+            cancelled: agentAnalytics.orders.todayCounts?.cancelled || 0,
+            partiallyCompleted:
+              agentAnalytics.orders.todayCounts?.partiallyCompleted || 0,
+          },
+        },
+        revenue: {
+          total: agentAnalytics.revenue.total || 0,
+          thisMonth: agentAnalytics.revenue.thisMonth || 0,
+          today: agentAnalytics.revenue.today || 0,
+        },
+      };
+    }
+    return null;
+  }, [isAdmin, adminAnalytics, isAgent, agentAnalytics]);
 
   useEffect(() => {
     fetchOrders();
@@ -265,8 +264,8 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       }
       toastTimerId = setTimeout(showBatchedToast, 2000);
 
-      invalidateAll();
       fetchOrders(); // Refresh orders list
+      invalidateAll();
     };
 
     // Handle order status update (for agents and admins)
@@ -302,8 +301,8 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
         toastTimerId = setTimeout(showBatchedToast, 2000);
       }
 
-      invalidateAll();
       fetchOrders(); // Refresh orders list
+      invalidateAll();
     };
 
     // Register listeners
@@ -670,8 +669,8 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
     return (
       <Card>
         <CardBody>
-          <div className="bg-(--error-lighter) border border-(--error)/20 rounded-lg">
-            <p className="text-(--error)">
+          <div className="bg-[var(--error-lighter)] border border-[var(--error)]/20 rounded-lg">
+            <p className="text-[var(--error)]">
               Error:{" "}
               {activeTab === "reported"
                 ? "Failed to load reported orders"
@@ -691,14 +690,14 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
         <CardBody>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold mb-2 text-(--text-primary)">
+              <h1 className="text-2xl font-bold mb-2 text-[var(--text-primary)]">
                 {isAdmin
                   ? "Order Management"
                   : isAgent
                     ? "Agent Orders"
                     : "My Orders"}
               </h1>
-              <p className="text-(--text-secondary)">
+              <p className="text-[var(--text-secondary)]">
                 {isAdmin
                   ? "Monitor and manage all platform orders"
                   : isAgent
@@ -736,16 +735,16 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       )}
       {/* Draft Orders Notification - Only show for agents when there are draft orders */}
       {(isAgent || !isAdmin) && hasDraftOrders && (
-        <Card className="border-(--warning) bg-(--warning-lighter)">
+        <Card className="border-[var(--warning)] bg-[var(--warning-lighter)]">
           <CardBody>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-start gap-3">
-                <FaExclamationTriangle className="text-(--warning) text-xl shrink-0 mt-0.5" />
+                <FaExclamationTriangle className="text-[var(--warning)] text-xl flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-(--warning) mb-1">
+                  <h3 className="font-semibold text-[var(--warning)] mb-1">
                     Draft Orders Need Attention
                   </h3>
-                  <p className="text-(--warning) text-sm">
+                  <p className="text-[var(--warning)] text-sm">
                     You have {draftOrders.length} draft order
                     {draftOrders.length !== 1 ? "s" : ""} waiting to be
                     processed. These orders require sufficient wallet balance to
@@ -776,18 +775,18 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {/* View Mode Section */}
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-(--text-secondary) shrink-0">
+              <span className="text-sm font-medium text-[var(--text-secondary)] flex-shrink-0">
                 View Mode:
               </span>
-              <div className="flex bg-(--bg-surface-alt) rounded-lg p-1">
+              <div className="flex bg-[var(--bg-surface-alt)] rounded-lg p-1">
                 {(["cards", "table"] as const).map((mode) => (
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
                     className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                       viewMode === mode
-                        ? "bg-(--bg-surface) text-(--text-primary) shadow-sm"
-                        : "text-(--text-muted) hover:text-(--text-primary)"
+                        ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     }`}
                   >
                     {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -798,8 +797,8 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     onClick={() => setViewMode("excel")}
                     className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                       viewMode === "excel"
-                        ? "bg-(--bg-surface) text-(--text-primary) shadow-sm"
-                        : "text-(--text-muted) hover:text-(--text-primary)"
+                        ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     }`}
                   >
                     Excel
@@ -830,10 +829,10 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                       size="sm"
                       onClick={handleDeselectAll}
                     >
-                      <FaTimes className="mr-1 text-(--text-muted)" />
+                      <FaTimes className="mr-1 text-[var(--text-muted)]" />
                       Deselect All
                     </Button>
-                    <span className="text-sm text-(--text-muted) shrink-0">
+                    <span className="text-sm text-[var(--text-muted)] flex-shrink-0">
                       {selectedOrders.length} selected
                     </span>
                   </>
@@ -849,9 +848,9 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
         activeTab !== "reported" && (
           <Card>
             <CardBody>
-              <div className="rounded-lg p-4 border border-secondary/20 bg-accent-soft">
+              <div className="rounded-lg p-4 border border-[var(--color-secondary)]/20 bg-[var(--color-accent-soft)]">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <span className="text-sm font-medium text-(--text-primary)">
+                  <span className="text-sm font-medium text-[var(--text-primary)]">
                     {selectedOrders.length} order(s) selected for bulk
                     processing
                   </span>
@@ -898,9 +897,9 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       {selectedOrders.length > 0 && isAdmin && activeTab === "reported" && (
         <Card>
           <CardBody>
-            <div className="bg-(--bg-surface-alt) border border-(--border-color-strong) rounded-lg p-4">
+            <div className="bg-[var(--bg-surface-alt)] border border-[var(--border-color-strong)] rounded-lg p-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <span className="text-sm text-(--text-primary) font-medium">
+                <span className="text-sm text-[var(--text-primary)] font-medium">
                   {selectedOrders.length} order(s) selected for reception status
                   update
                 </span>
@@ -909,7 +908,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => handleBulkReceptionStatus("received")}
-                    className="flex-1 sm:flex-none border-(--success)/30 text-(--success) hover:bg-(--success-lighter)"
+                    className="flex-1 sm:flex-none border-[var(--success)]/30 text-[var(--success)] hover:bg-[var(--success-lighter)]"
                   >
                     <FaCheck className="mr-1" />
                     <span className="hidden sm:inline">Mark Received</span>
@@ -919,7 +918,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => handleBulkReceptionStatus("checking")}
-                    className="flex-1 sm:flex-none border-(--warning)/30 text-(--warning) hover:bg-(--warning-lighter)"
+                    className="flex-1 sm:flex-none border-[var(--warning)]/30 text-[var(--warning)] hover:bg-[var(--warning-lighter)]"
                   >
                     <FaClock className="mr-1" />
                     <span className="hidden sm:inline">Mark Checking</span>
@@ -929,7 +928,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
                     size="sm"
                     variant="outline"
                     onClick={() => handleBulkReceptionStatus("resolved")}
-                    className="flex-1 sm:flex-none border-secondary/30 text-secondary hover:bg-accent-soft"
+                    className="flex-1 sm:flex-none border-[var(--color-secondary)]/30 text-[var(--color-secondary)] hover:bg-[var(--color-accent-soft)]"
                   >
                     <FaCheck className="mr-1" />
                     <span className="hidden sm:inline">Mark Resolved</span>
@@ -945,13 +944,13 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       {(isAdmin || isAgent) && (
         <Card>
           <CardBody>
-            <div className="flex border-b border-(--border-color)">
+            <div className="flex border-b border-[var(--border-color)]">
               <button
                 onClick={() => setActiveTab("all")}
                 className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === "all"
-                    ? "border-secondary text-secondary"
-                    : "border-transparent text-(--text-muted) hover:text-(--text-primary) hover:border-(--border-color)"
+                    ? "border-[var(--color-secondary)] text-[var(--color-secondary)]"
+                    : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-color)]"
                 }`}
               >
                 All Orders

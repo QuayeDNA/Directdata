@@ -2,8 +2,8 @@
  * StoreLandingPage — Clean & Modern redesign
  * Light, simple, minimal — no overkill.
  *
- * On the consolidated domain this is served at directdata.com/store
- * Individual stores are at directdata.com/store/:businessName
+ * On the consolidated domain this is served at brytelinks.com/store
+ * Individual stores are at brytelinks.com/store/:businessName
  */
 
 import { useState, useEffect, useCallback } from 'react';

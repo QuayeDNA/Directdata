@@ -15,6 +15,7 @@ export function usePublicAnnouncements({ businessName, dismissedKey, viewedKey }
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
+  // Load persisted dismiss/view state
   useEffect(() => {
     try {
       const storedViewed = localStorage.getItem(viewedKey);
@@ -50,6 +51,7 @@ export function usePublicAnnouncements({ businessName, dismissedKey, viewedKey }
     markViewed(id);
   }, [dismissedKey, markViewed]);
 
+  // Fetch active announcements
   useEffect(() => {
     if (!businessName) return;
     setLoading(true);
@@ -59,6 +61,7 @@ export function usePublicAnnouncements({ businessName, dismissedKey, viewedKey }
       .finally(() => setLoading(false));
   }, [businessName]);
 
+  // WebSocket for real-time
   const wsConnected = useRef<string | null>(null);
   useEffect(() => {
     if (!businessName) return;

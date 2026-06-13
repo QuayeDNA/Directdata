@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PackageManagement } from "../components/products/PackageManagement";
 import { useAuth } from '../hooks/use-auth';
 import { packageService } from "../services/package.service";
@@ -130,11 +130,9 @@ const AgentPackageGrid: React.FC = () => {
 
 const PackageManagementPage: React.FC = () => {
   const { authState } = useAuth();
-  const location = useLocation();
   const isSuperAdmin = authState.user?.userType === 'super_admin';
-  const isSuperAdminRoute = location.pathname.startsWith('/superadmin');
 
-  if (isSuperAdmin || isSuperAdminRoute) {
+  if (isSuperAdmin) {
     return <PackageManagement isSuperAdmin />;
   }
 

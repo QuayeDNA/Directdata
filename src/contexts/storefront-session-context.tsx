@@ -30,8 +30,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 // ─── Storage keys ─────────────────────────────────────────────────────────────
 
-const SESSION_KEY = 'directdata_storefront_session';
-const BUSINESS_KEY = 'directdata_storefront_business';
+const SESSION_KEY = 'brytelinks_storefront_session';
+const BUSINESS_KEY = 'brytelinks_storefront_business';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 

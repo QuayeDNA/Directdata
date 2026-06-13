@@ -7,6 +7,7 @@ import { PageLoader } from "../components/page-loader";
 import { ProtectedRoute } from "../components/protected-route";
 import { StorefrontRouteGuard } from "../contexts/storefront-session-context";
 import superadminRoutes from "./superadmin-routes";
+import { BUSINESS_USER_TYPES } from "../utils/userTypeHelpers";
 
 // =============================================================================
 // LAZY LOADED COMPONENTS - PUBLIC PAGES
@@ -119,15 +120,16 @@ const StorefrontDashboardPage = lazy(() =>
     default: module.StorefrontDashboardPage,
   })),
 );
+const ApiMarketplacePage = lazy(() =>
+  import("../pages/agent/api-marketplace").then((module) => ({
+    default: module.ApiMarketplacePage,
+  })),
+);
 
 // =============================================================================
 // LAZY LOADED COMPONENTS - COMMISSION & REFERRAL PAGES
 // =============================================================================
-const CommissionPage = lazy(() =>
-  import("../pages/agent/commission-page").then((module) => ({
-    default: module.CommissionPage,
-  })),
-);
+const CommissionPage = lazy(() => import("../pages/agent/commissions"));
 
 // =============================================================================
 // LAZY LOADED COMPONENTS - PACKAGE SPECIFIC PAGES
@@ -293,8 +295,8 @@ const publicRoutes: RouteObject[] = [
   },
 
   // ── STOREFRONT ROUTES — never wrapped in SystemRouteElement ───────────────
-  // directdata.com/store           → discovery / landing page
-  // directdata.com/store/:name     → individual agent store
+  // brytelinks.com/store           → discovery / landing page
+  // brytelinks.com/store/:name     → individual agent store
   {
     path: "/store",
     element: (
@@ -347,12 +349,7 @@ const agentRoutes: RouteObject[] = [
       <SystemRouteElement
         element={
           <ProtectedRoute
-            allowedUserTypes={[
-              "agent",
-              "super_agent",
-              "dealer",
-              "super_dealer",
-            ]}
+            allowedUserTypes={BUSINESS_USER_TYPES}
           />
         }
       />
@@ -435,10 +432,26 @@ const agentRoutes: RouteObject[] = [
             ),
           },
           {
-            path: "privacy-policy",
+            path: "api-marketplace",
             element: (
               <Suspense fallback={<PageLoader />}>
-                <PrivacyPolicyPage />
+                <ApiMarketplacePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "profile",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <ProfilePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "api-marketplace",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <ApiMarketplacePage />
               </Suspense>
             ),
           },

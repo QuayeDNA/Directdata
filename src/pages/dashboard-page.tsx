@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useWallet } from "../hooks";
-import { useProvider } from "../hooks/use-provider";
 import { useAgentAnalytics } from "../hooks/use-analytics";
+import { useProvider } from "../hooks/use-provider";
 import { useSiteStatus } from "../contexts/site-status-context";
 import { orderService } from "../services/order.service";
 import { packageService } from "../services/package.service";
@@ -78,18 +78,17 @@ export const DashboardPage = () => {
     WalletTransaction[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [analyticsTimeframe, setAnalyticsTimeframe] = useState("7d"); // default to Weekly
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState("7d");
 
-  const { data: agentAnalytics, isLoading: analyticsLoading } = useAgentAnalytics(analyticsTimeframe);
+  const {
+    data: agentAnalytics,
+    isLoading: analyticsLoading,
+  } = useAgentAnalytics(analyticsTimeframe);
 
   const analyticsData = useMemo(() => {
     if (!agentAnalytics) {
       return {
-        orders: {
-          total: 0, completed: 0, pending: 0, processing: 0, confirmed: 0,
-          failed: 0, cancelled: 0, partiallyCompleted: 0, successRate: 0,
-          todayCounts: { total: 0, completed: 0, pending: 0, processing: 0, confirmed: 0, failed: 0, cancelled: 0, partiallyCompleted: 0 },
-        },
+        orders: { total: 0, completed: 0, pending: 0, processing: 0, confirmed: 0, failed: 0, cancelled: 0, partiallyCompleted: 0, successRate: 0, todayCounts: { total: 0, completed: 0, pending: 0, processing: 0, confirmed: 0, failed: 0, cancelled: 0, partiallyCompleted: 0 } },
         revenue: { total: 0, today: 0, orderCount: 0, averageOrderValue: 0 },
         wallet: { balance: 0 },
         charts: { labels: [] as string[], orders: [] as number[], revenue: [] as number[], completedOrders: [] as number[] },
@@ -221,7 +220,7 @@ export const DashboardPage = () => {
     return type === "credit" ? "success" : "error";
   };
 
-  // Load dashboard data (transactions only - analytics via React Query)
+  // Load dashboard data (transactions only)
   useEffect(() => {
     const loadTransactions = async () => {
       try {
@@ -329,8 +328,7 @@ export const DashboardPage = () => {
     }
   };
 
-  // Generate dynamic labels based on timeframe
-  // Prepare sales chart data using backend labels directly
+  // Prepare sales chart data - uses backend labels directly
   const salesChartData = useMemo(() => {
     const labels = analyticsData.charts.labels || [];
     const revenueData = analyticsData.charts.revenue || [];
@@ -450,6 +448,11 @@ export const DashboardPage = () => {
         beginAtZero: true,
         ticks: {
           stepSize: 1,
+        },
+      },
+      x: {
+        grid: {
+          display: false,
         },
       },
     },
@@ -737,7 +740,7 @@ export const DashboardPage = () => {
           </div>
         </CardHeader>
         <CardBody>
-          {loading || analyticsLoading ? (
+          {(loading || analyticsLoading) ? (
             <div className="flex justify-center items-center h-40 sm:h-48">
               <Spinner />
             </div>
@@ -785,7 +788,7 @@ export const DashboardPage = () => {
           </div>
         </CardHeader>
         <CardBody>
-          {loading || analyticsLoading ? (
+          {(loading || analyticsLoading) ? (
             <div className="flex justify-center items-center h-40 sm:h-48">
               <Spinner />
             </div>

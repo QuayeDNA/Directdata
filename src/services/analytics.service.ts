@@ -240,12 +240,6 @@ export interface AnalyticsData {
 }
 
 export interface AgentAnalyticsData {
-  commissions?: {
-    commissionBalance: number;
-    totalEarned: number;
-    totalWithdrawn: number;
-    creditedCount: number;
-  };
   users: {
     referredUsers: number;
     totalReferredUsers: number;
@@ -293,6 +287,12 @@ export interface AgentAnalyticsData {
       description: string;
       createdAt: string;
     }>;
+  };
+  commissions: {
+    commissionBalance: number;
+    totalEarned: number;
+    totalWithdrawn: number;
+    creditedCount: number;
   };
   charts: {
     labels: string[];
@@ -368,7 +368,6 @@ class AnalyticsService {
     const response = await apiClient.get("/api/analytics/realtime");
     return response.data.data;
   }
-
 }
 
 export const analyticsService = new AnalyticsService();

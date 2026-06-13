@@ -13,6 +13,10 @@ import {
   settingsService,
   type WalletSettings,
 } from "../../services/settings.service";
+import {
+  BUSINESS_USER_TYPES,
+  USER_TYPE_LABELS,
+} from "../../utils/userTypeHelpers";
 
 interface WalletSettingsDialogProps {
   isOpen: boolean;
@@ -80,33 +84,24 @@ export const WalletSettingsDialog: React.FC<WalletSettingsDialogProps> = ({
     }));
   };
 
+  const userTypeMeta: Record<string, { icon: string; accentVar: string }> = {
+    agent: { icon: "👤", accentVar: "--success" },
+    super_agent: { icon: "⭐", accentVar: "--warning" },
+    dealer: { icon: "🏪", accentVar: "--color-primary" },
+    super_dealer: { icon: "👑", accentVar: "--color-secondary" },
+    elite_dealer: { icon: "💎", accentVar: "--color-secondary" },
+    master_dealer: { icon: "🏆", accentVar: "--error" },
+  };
+
   const userTypes = [
+    ...BUSINESS_USER_TYPES.map((type) => ({
+      key: type,
+      label: USER_TYPE_LABELS[type],
+      icon: userTypeMeta[type]?.icon ?? "👤",
+      accentVar: userTypeMeta[type]?.accentVar ?? "--text-muted",
+    })),
     {
-      key: "agent" as const,
-      label: "Agent",
-      icon: "👤",
-      accentVar: "--success",
-    },
-    {
-      key: "super_agent" as const,
-      label: "Super Agent",
-      icon: "⭐",
-      accentVar: "--warning",
-    },
-    {
-      key: "dealer" as const,
-      label: "Dealer",
-      icon: "🏪",
-      accentVar: "--color-primary",
-    },
-    {
-      key: "super_dealer" as const,
-      label: "Super Dealer",
-      icon: "👑",
-      accentVar: "--color-secondary",
-    },
-    {
-      key: "default" as const,
+      key: "default",
       label: "Default",
       icon: "⚙️",
       accentVar: "--text-muted",
@@ -164,7 +159,9 @@ export const WalletSettingsDialog: React.FC<WalletSettingsDialogProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {userTypes.map(({ key, label, icon, accentVar }) => (
+              {userTypes.map(({ key, label, icon, accentVar }) => {
+                const amountKey = key as keyof typeof formData.minimumTopUpAmounts;
+                return (
                 <div
                   key={key}
                   className="p-4 border rounded-lg"
@@ -189,14 +186,15 @@ export const WalletSettingsDialog: React.FC<WalletSettingsDialogProps> = ({
                       type="number"
                       min="0"
                       step="0.01"
-                      value={formData.minimumTopUpAmounts[key]}
-                      onChange={(e) => handleAmountChange(key, e.target.value)}
+                      value={formData.minimumTopUpAmounts[amountKey]}
+                      onChange={(e) => handleAmountChange(amountKey, e.target.value)}
                       placeholder="0.00"
                       leftIcon={<span style={{ color: 'var(--text-secondary)' }}>₵</span>}
                     />
                   </FormField>
                 </div>
-              ))}
+              );
+              })}
             </div>
 
             <div className="p-4 rounded-lg" style={{ backgroundColor: 'color-mix(in srgb, var(--warning) 5%, transparent)' }}>

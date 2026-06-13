@@ -29,13 +29,18 @@ import { Button } from "../../design-system/components/button";
 import { StatCard } from "../../design-system/components/stats-card";
 import { Pagination } from "../../design-system/components/pagination";
 import { Skeleton, LoadingCard } from "../../design-system/components/loading";
+import {
+  BUSINESS_USER_TYPES,
+  USER_TYPE_LABELS,
+} from "../../utils/userTypeHelpers";
 
 const userTypeOptions = [
   { value: "", label: "All Users", icon: FaUser },
-  { value: "agent", label: "Agents", icon: FaStore },
-  { value: "super_agent", label: "Super Agents", icon: FaStore },
-  { value: "dealer", label: "Dealers", icon: FaStore },
-  { value: "super_dealer", label: "Super Dealers", icon: FaStore },
+  ...BUSINESS_USER_TYPES.map((type) => ({
+    value: type,
+    label: `${USER_TYPE_LABELS[type]}s`,
+    icon: FaStore,
+  })),
   { value: "super_admin", label: "Super Admins", icon: FaShieldAlt },
 ];
 
@@ -227,6 +232,7 @@ export default function SuperAdminUsersPage() {
   };
 
   const getUserTypeLabel = (userType: string) => {
+    // Import from centralized source - keep local wrapper for backward compat
     const labels: Record<string, string> = {
       agent: "Agent",
       super_agent: "Super Agent",
