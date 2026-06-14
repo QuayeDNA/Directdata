@@ -1,11 +1,11 @@
 export const CONTACTS = {
   support: {
-    phone: "+233548983019",
-    waLink: "https://wa.me/+233548983019",
+    phone: "+233595731124",
+    waLink: "https://wa.me/+233595731124",
     waLinkWithMsg: (msg: string) =>
-      `https://wa.me/+233548983019?text=${encodeURIComponent(msg)}`,
+      `https://wa.me/+233595731124?text=${encodeURIComponent(msg)}`,
   },
   community: {
-    waGroupLink: "https://chat.whatsapp.com/EstSwEm3q9Z4sS42Ed5N8u",
+    waGroupLink: "https://chat.whatsapp.com/GZd9FCxP9U9LMRHw7r7UXX",
   },
 } as const;
