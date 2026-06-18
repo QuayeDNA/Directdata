@@ -43,6 +43,7 @@ export interface StorefrontData {
 
 export interface StorefrontBranding {
   logoUrl?: string;
+  bannerUrl?: string;
   tagline?: string;
   socialLinks?: {
     facebook?: string;
@@ -51,6 +52,12 @@ export interface StorefrontBranding {
     tiktok?: string;
   };
   footerText?: string;
+}
+
+/** Response shape for asset upload endpoints */
+export interface AssetUploadResponse {
+  url: string;
+  branding: StorefrontBranding;
 }
 
 /** Response shape for getMyStorefront when store is admin-suspended */
@@ -706,6 +713,73 @@ class StorefrontService {
     const response = await apiClient.put(`${this.basePath}/admin/settings/auto-approve`, { enabled });
     return response.data.data;
   }
+
+  // =========================================================================
+  // Asset Uploads (Logo / Banner)
+  // =========================================================================
+
+  /** Upload store logo — replaces old file on server, returns URL + updated branding */
+  async uploadLogo(file: File, onProgress?: (pct: number) => void): Promise<AssetUploadResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post<{ success: boolean; data: AssetUploadResponse }>(
+      `${this.basePath}/agent/storefront/logo`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (e) => {
+          if (onProgress && e.total) {
+            onProgress(Math.round((e.loaded * 100) / e.total));
+          }
+        },
+      },
+    );
+    const data = response.data.data;
+    return { ...data, url: toAbsoluteUrl(data.url) };
+  }
+
+  /** Delete store logo — removes file on server, clears branding field */
+  async deleteLogo(): Promise<{ branding: StorefrontBranding }> {
+    const response = await apiClient.delete<{ success: boolean; data: { branding: StorefrontBranding } }>(
+      `${this.basePath}/agent/storefront/logo`,
+    );
+    return response.data.data;
+  }
+
+  /** Upload store banner — replaces old file on server, returns URL + updated branding */
+  async uploadBanner(file: File, onProgress?: (pct: number) => void): Promise<AssetUploadResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post<{ success: boolean; data: AssetUploadResponse }>(
+      `${this.basePath}/agent/storefront/banner`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (e) => {
+          if (onProgress && e.total) {
+            onProgress(Math.round((e.loaded * 100) / e.total));
+          }
+        },
+      },
+    );
+    const data = response.data.data;
+    return { ...data, url: toAbsoluteUrl(data.url) };
+  }
+
+  /** Delete store banner — removes file on server, clears branding field */
+  async deleteBanner(): Promise<{ branding: StorefrontBranding }> {
+    const response = await apiClient.delete<{ success: boolean; data: { branding: StorefrontBranding } }>(
+      `${this.basePath}/agent/storefront/banner`,
+    );
+    return response.data.data;
+  }
+}
+
+/** Convert relative URLs to absolute using the API origin */
+function toAbsoluteUrl(url: string): string {
+  if (!url || url.startsWith("http")) return url;
+  const base = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : "");
+  return base ? `${base.replace(/\/+$/, "")}${url}` : url;
 }
 
 export const storefrontService = new StorefrontService();

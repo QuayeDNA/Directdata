@@ -5,7 +5,7 @@ import { Card } from "../../design-system/components/card";
 import { Badge } from "../../design-system/components/badge";
 import { Spinner, Tabs, TabsList, TabsTrigger, Switch } from "../../design-system";
 import { useToast } from "../../design-system/components/toast";
-import { useAuth } from "../../hooks";
+import { useAuth, useProfilePhoto } from "../../hooks";
 import { DarkModeToggle } from "../../components/common/dark-mode-toggle";
 import { settingsService, type SiteSettings, type ApiSettings, type WalletSettings, type FeeSettings, type BryteLinksSettings, type SystemInfo } from "../../services/settings.service";
 import pushNotificationService from "../../services/pushNotificationService";
@@ -37,8 +37,8 @@ export default function SuperAdminSettingsPage() {
   const [feeDialogOpen, setFeeDialogOpen] = useState(false);
   const [feeSettings, setFeeSettings] = useState<FeeSettings | null>(null);
   const [testPushLoading, setTestPushLoading] = useState(false);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const { authState, refreshAuth } = useAuth();
+  const { upload: uploadPhoto, remove: removePhoto, isUploading: isUploadingPhoto, photoError } = useProfilePhoto();
 
   // single load + client cache via settingsService.getAllSettings()
   useEffect(() => {
@@ -217,18 +217,22 @@ export default function SuperAdminSettingsPage() {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setIsUploadingPhoto(true);
-    try {
-      const { uploadService } = await import("../../services/upload.service");
-      const url = await uploadService.uploadImage(file);
-      const { userService } = await import("../../services/user.service");
-      await userService.updateProfilePicture(url);
+    const result = await uploadPhoto(file);
+    if (result) {
       await refreshAuth();
       addToast("Profile photo updated", "success");
-    } catch (err) {
-      addToast(err instanceof Error ? err.message : "Photo upload failed", "error");
-    } finally {
-      setIsUploadingPhoto(false);
+    } else {
+      addToast(photoError || "Photo upload failed", "error");
+    }
+  };
+
+  const handlePhotoRemove = async () => {
+    const ok = await removePhoto();
+    if (ok) {
+      await refreshAuth();
+      addToast("Profile photo removed", "success");
+    } else {
+      addToast(photoError || "Failed to remove photo", "error");
     }
   };
 
@@ -511,6 +515,16 @@ export default function SuperAdminSettingsPage() {
                       {isUploadingPhoto ? "Uploading…" : "Hover avatar to change photo"}
                     </p>
                   </div>
+                  {authState.user?.profilePicture && !isUploadingPhoto && (
+                    <button
+                      type="button"
+                      onClick={handlePhotoRemove}
+                      className="text-xs underline whitespace-nowrap"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
 
                 <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'color-mix(in srgb, var(--success) 8%, transparent)' }}>
