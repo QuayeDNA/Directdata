@@ -7,6 +7,7 @@ interface StoreHeaderProps {
   };
   branding: {
     logoUrl?: string;
+    bannerUrl?: string;
     tagline?: string;
   };
 }
@@ -48,19 +49,43 @@ export const StoreHeader = memo(function StoreHeader({
   const displayName = storefront.displayName || storefront.businessName || "";
   const tagline =
     branding.tagline || pickTagline(storefront.businessName || displayName);
-  const logoSrc = branding.logoUrl || "/icons/store-icon.png";
+
+  const bannerUrl = branding.bannerUrl || "";
+  const logoSrc = branding.logoUrl;
+
+  const hasBanner = !!bannerUrl;
+  const hasLogo = !!logoSrc;
+
   const [mounted, setMounted] = useState(false);
+  const [bannerLoaded, setBannerLoaded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   return (
-    <header className={`sh-header ${mounted ? "is-mounted" : ""}`}>
-      <div className="sh-header__inner">
-        <div className="sh-header__logo-wrap">
-          <img src={logoSrc} alt={displayName} className="sh-header__logo" />
+    <header
+      className={`sh-header ${mounted ? "is-mounted" : ""} ${hasBanner ? "has-banner" : ""} ${bannerLoaded ? "banner-loaded" : ""}`}
+    >
+      {hasBanner && (
+        <div className="sh-header__bg" aria-hidden="true">
+          <img
+            src={bannerUrl}
+            alt=""
+            className="sh-header__bg-img"
+            onLoad={() => setBannerLoaded(true)}
+            onError={() => setBannerLoaded(false)}
+          />
+          <div className="sh-header__bg-overlay" />
         </div>
+      )}
+
+      <div className="sh-header__inner">
+        {hasLogo && (
+          <div className="sh-header__logo-wrap">
+            <img src={logoSrc} alt={displayName} className="sh-header__logo" />
+          </div>
+        )}
         <h1 className="sh-header__name">{displayName}</h1>
         <div className="sh-header__rule" />
         {tagline && <p className="sh-header__tagline">{tagline}</p>}
@@ -73,6 +98,48 @@ export const StoreHeader = memo(function StoreHeader({
           display: flex;
           justify-content: center;
           padding: clamp(48px, 10vw, 100px) clamp(20px, 5vw, 64px) clamp(40px, 6vw, 72px);
+          position: relative;
+        }
+
+        .sh-header.has-banner {
+          padding: 0;
+          overflow: hidden;
+        }
+
+        .sh-header__bg {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          opacity: 0;
+          transition: opacity 800ms cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .sh-header.banner-loaded .sh-header__bg {
+          opacity: 1;
+        }
+
+        .sh-header__bg-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+
+        .sh-header__bg-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.5) 0%,
+            rgba(0, 0, 0, 0.2) 50%,
+            rgba(0, 0, 0, 0.05) 80%
+          );
+        }
+
+        .sh-header.has-banner .sh-header__inner {
+          position: relative;
+          z-index: 1;
+          padding: clamp(48px, 10vw, 100px) clamp(20px, 5vw, 64px) clamp(56px, 8vw, 96px);
         }
 
         .sh-header__inner {
@@ -112,8 +179,13 @@ export const StoreHeader = memo(function StoreHeader({
           width: clamp(72px, 11vw, 104px);
           border-radius: 24px;
           object-fit: cover;
-          border: 1px solid rgba(255,255,255,0.12);
-          box-shadow: 0 2px 12px rgba(255,255,255,0.06);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .sh-header.has-banner .sh-header__logo {
+          border-color: rgba(255, 255, 255, 0.25);
+          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
         }
 
         .sh-header__name {
@@ -138,6 +210,7 @@ export const StoreHeader = memo(function StoreHeader({
         .sh-header__name:empty::before {
           content: "Your Store";
           opacity: 0.35;
+          color: #fff;
           font-family: 'Cabinet Grotesk', sans-serif;
           font-weight: 800;
         }
@@ -148,7 +221,7 @@ export const StoreHeader = memo(function StoreHeader({
           height: 2px;
           border-radius: 1px;
           background: #fff;
-          opacity: 0.15;
+          opacity: 0.25;
           transition: width 800ms cubic-bezier(0.19, 1, 0.22, 1);
           transition-delay: 500ms;
         }
@@ -163,7 +236,7 @@ export const StoreHeader = memo(function StoreHeader({
           font-size: clamp(14px, 2.2vw, 19px);
           line-height: 1.65;
           letter-spacing: 0.01em;
-          color: rgba(255,255,255,0.7);
+          color: rgba(255, 255, 255, 0.75);
           margin: clamp(16px, 2.5vw, 28px) 0 0;
           max-width: 32em;
           opacity: 0;
@@ -182,7 +255,8 @@ export const StoreHeader = memo(function StoreHeader({
           .sh-header__logo-wrap,
           .sh-header__name,
           .sh-header__rule,
-          .sh-header__tagline {
+          .sh-header__tagline,
+          .sh-header__bg {
             transition: none !important;
             opacity: 1 !important;
             transform: none !important;

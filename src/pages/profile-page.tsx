@@ -58,6 +58,7 @@ export const ProfilePage: React.FC = () => {
         : "denied",
     );
   const { upload: uploadPhoto, remove: removePhoto, isUploading: isUploadingPhoto, photoError } = useProfilePhoto();
+  const hasUploadedPhoto = profileData?.profilePicture && !profileData.profilePicture.includes('/api/assets/avatar');
   const { addToast } = useToast();
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -470,7 +471,7 @@ export const ProfilePage: React.FC = () => {
                     )}
                   </label>
                 </div>
-                {profileData.profilePicture && !isUploadingPhoto && (
+                {hasUploadedPhoto && !isUploadingPhoto && (
                   <button
                     type="button"
                     onClick={handlePhotoRemove}
@@ -948,7 +949,7 @@ export const ProfilePage: React.FC = () => {
                         )}
                       </label>
                     </div>
-                    {profileData.profilePicture && !isUploadingPhoto && (
+                    {hasUploadedPhoto && !isUploadingPhoto && (
                       <button
                         type="button"
                         onClick={handlePhotoRemove}

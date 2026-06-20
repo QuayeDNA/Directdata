@@ -39,6 +39,7 @@ export default function SuperAdminSettingsPage() {
   const [testPushLoading, setTestPushLoading] = useState(false);
   const { authState, refreshAuth } = useAuth();
   const { upload: uploadPhoto, remove: removePhoto, isUploading: isUploadingPhoto, photoError } = useProfilePhoto();
+  const hasUploadedPhoto = authState.user?.profilePicture && !authState.user.profilePicture.includes('/api/assets/avatar');
 
   // single load + client cache via settingsService.getAllSettings()
   useEffect(() => {
@@ -515,7 +516,7 @@ export default function SuperAdminSettingsPage() {
                       {isUploadingPhoto ? "Uploading…" : "Hover avatar to change photo"}
                     </p>
                   </div>
-                  {authState.user?.profilePicture && !isUploadingPhoto && (
+                  {hasUploadedPhoto && !isUploadingPhoto && (
                     <button
                       type="button"
                       onClick={handlePhotoRemove}
