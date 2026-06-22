@@ -457,4 +457,32 @@ export const walletService = {
       pagination: response.data.pagination,
     };
   },
+
+  /**
+   * MoMo Bridge: Get checkout configuration for the widget
+   */
+  getMomoBridgeConfig: async (): Promise<{
+    relayUrl: string;
+    apiKey: string;
+  }> => {
+    const response = await apiClient.get<{ success: boolean; data: any }>(
+      `/api/wallet/momo/config`
+    );
+    return response.data.data;
+  },
+
+  /**
+   * MoMo Bridge: Verify a payment and credit the wallet
+   * The amount is extracted from the relay response — not passed by the user.
+   */
+  verifyMomoClaim: async (
+    reference: string
+  ): Promise<{ success: boolean; message: string; data: { grossAmount: number; feeAmount: number; netAmount: number; feePercent: number; reference: string } }> => {
+    const response = await apiClient.post<{
+      success: boolean;
+      message: string;
+      data: any;
+    }>("/api/wallet/momo/verify", { reference });
+    return response.data;
+  },
 };
