@@ -105,6 +105,8 @@ export interface MomoBridgeSettings {
   momoBridgeRelayUrl: string;
   momoBridgeEnabled: boolean;
   momoBridgeClaimFeePercent: number;
+  momoBridgeAccountName: string;
+  momoBridgeAccountNumber: string;
 }
 
 // =============================================================================

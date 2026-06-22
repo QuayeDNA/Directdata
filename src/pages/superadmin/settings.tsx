@@ -735,6 +735,18 @@ export default function SuperAdminSettingsPage() {
                     <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Platform Fee</div>
                     <div className="font-medium">{data.momoBridgeSettings.momoBridgeClaimFeePercent}%</div>
                   </div>
+                  {data.momoBridgeSettings.momoBridgeAccountName && (
+                    <div className="p-3 rounded-lg flex items-center justify-between col-span-full sm:col-span-2" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Account Name</div>
+                      <div className="font-medium" style={{ color: 'var(--text-primary)' }}>{data.momoBridgeSettings.momoBridgeAccountName}</div>
+                    </div>
+                  )}
+                  {data.momoBridgeSettings.momoBridgeAccountNumber && (
+                    <div className="p-3 rounded-lg flex items-center justify-between col-span-full sm:col-span-2" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Account Number</div>
+                      <div className="font-mono font-medium" style={{ color: '#d4a843' }}>{data.momoBridgeSettings.momoBridgeAccountNumber}</div>
+                    </div>
+                  )}
                 </div>
               </Card>
 
