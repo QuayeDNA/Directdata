@@ -79,7 +79,7 @@ export const WalletPage = () => {
     if ((window as any).MoMoBridge) return;
     return new Promise((resolve, reject) => {
       const s = document.createElement("script");
-      s.src = "https://momo-bridge.vercel.app/momobridge.js?v=3";
+      s.src = "https://momo-bridge.vercel.app/momobridge.js?v=4";
       s.async = true;
       s.onload = () => resolve();
       s.onerror = () => reject(new Error("Failed to load MoMo Bridge script"));
@@ -766,7 +766,7 @@ export const WalletPage = () => {
                       >
                         <div className="flex items-start gap-3">
                           <div
-                            className="flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0 mt-0.5"
+                            className="flex items-center justify-center w-9 h-9 rounded-full shrink-0 mt-0.5"
                             style={{
                               backgroundColor: "var(--bg-surface)",
                               boxShadow: "var(--shadow-sm)",
@@ -833,7 +833,7 @@ export const WalletPage = () => {
                               {transaction.reference &&
                                 !transaction.reference.startsWith("TXN") && (
                                   <p
-                                    className="text-xs font-mono truncate max-w-[180px]"
+                                    className="text-xs font-mono truncate max-w-45"
                                     style={{ color: "var(--text-muted)" }}
                                   >
                                     Ref: {transaction.reference.slice(0, 24)}
@@ -842,7 +842,7 @@ export const WalletPage = () => {
                             </div>
                           </div>
 
-                          <div className="text-right flex-shrink-0 ml-2">
+                          <div className="text-right shrink-0 ml-2">
                             <p
                               className="font-bold text-base sm:text-lg leading-tight"
                               style={{ color: txColor }}
