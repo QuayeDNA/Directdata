@@ -314,7 +314,7 @@ export default function SuperAdminSettingsPage() {
 
   if (loading || !data) {
     return (
-      <div className="min-h-[240px] flex items-center justify-center">
+      <div className="min-h-60 flex items-center justify-center">
         <Spinner size="lg" color="primary" />
       </div>
     );
@@ -332,7 +332,7 @@ export default function SuperAdminSettingsPage() {
       {/* Profile picture — always visible above tabs */}
       <Card>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white shadow-md flex-shrink-0 overflow-hidden relative group" style={!authState.user?.profilePicture ? { background: "var(--gradient-primary)" } : undefined}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white shadow-md shrink-0 overflow-hidden relative group" style={!authState.user?.profilePicture ? { background: "var(--gradient-primary)" } : undefined}>
             {authState.user?.profilePicture ? (
               <img src={authState.user.profilePicture} alt="" className="h-full w-full object-cover" />
             ) : (
@@ -685,6 +685,14 @@ export default function SuperAdminSettingsPage() {
                     <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Super Dealer Minimum</div>
                     <div className="font-medium">GH₵{data.walletSettings.minimumTopUpAmounts.super_dealer}</div>
                   </div>
+                  <div className="p-3 rounded-lg flex justify-between" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Elite Dealer Minimum</div>
+                    <div className="font-medium">GH₵{data.walletSettings.minimumTopUpAmounts.elite_dealer}</div>
+                  </div>
+                  <div className="p-3 rounded-lg flex justify-between" style={{ backgroundColor: 'var(--bg-muted)' }}>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Master Dealer Minimum</div>
+                    <div className="font-medium">GH₵{data.walletSettings.minimumTopUpAmounts.master_dealer}</div>
+                  </div>
                   <div className="p-3 rounded-lg flex justify-between col-span-full sm:col-span-1" style={{ backgroundColor: 'var(--bg-muted)' }}>
                     <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Default Minimum</div>
                     <div className="font-medium">GH₵{data.walletSettings.minimumTopUpAmounts.default}</div>
@@ -719,7 +727,7 @@ export default function SuperAdminSettingsPage() {
                   </div>
                   <div className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: 'var(--bg-muted)' }}>
                     <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Relay URL</div>
-                    <div className="text-sm font-mono truncate max-w-[180px]" style={{ color: 'var(--text-primary)' }}>
+                    <div className="text-sm font-mono truncate max-w-45" style={{ color: 'var(--text-primary)' }}>
                       {data.momoBridgeSettings.momoBridgeRelayUrl || 'Default'}
                     </div>
                   </div>
