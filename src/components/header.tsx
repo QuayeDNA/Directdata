@@ -237,6 +237,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             onClick={onMenuClick}
             className="md:hidden flex-shrink-0 h-9 w-9 p-0 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
             aria-label="Open sidebar menu"
+            data-tour="header-menu"
           >
             <FaBars className="w-4 h-4" />
           </Button>

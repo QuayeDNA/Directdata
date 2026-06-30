@@ -690,7 +690,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
         <CardBody>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold mb-2 text-[var(--text-primary)]">
+              <h1 data-tour="orders-heading" className="text-2xl font-bold mb-2 text-[var(--text-primary)]">
                 {isAdmin
                   ? "Order Management"
                   : isAgent
@@ -725,13 +725,15 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
       </Card>
       {/* Analytics Section - Only show for admin and agents */}
       {(isAdmin || isAgent) && (
-        <OrderAnalytics
-          analyticsData={analyticsData}
-          loading={analyticsLoading}
-          error={analyticsError}
-          isAdmin={isAdmin}
-          isAgent={isAgent}
-        />
+        <div data-tour="orders-analytics">
+          <OrderAnalytics
+            analyticsData={analyticsData}
+            loading={analyticsLoading}
+            error={analyticsError}
+            isAdmin={isAdmin}
+            isAgent={isAgent}
+          />
+        </div>
       )}
       {/* Draft Orders Notification - Only show for agents when there are draft orders */}
       {(isAgent || !isAdmin) && hasDraftOrders && (
@@ -1008,7 +1010,7 @@ export const UnifiedOrderList: React.FC<UnifiedOrderListProps> = ({
           </CardBody>
         </Card>
       ) : viewMode === "cards" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div data-tour="orders-list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentOrders.map((order: Order) => (
             <UnifiedOrderCard
               key={order._id}

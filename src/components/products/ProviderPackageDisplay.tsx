@@ -373,7 +373,7 @@ export const ProviderPackageDisplay: React.FC<ProviderPackageDisplayProps> = ({
                 )}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+                <h2 data-tour="packages-heading" className="text-2xl font-bold text-[var(--text-primary)]">
                   {providerData?.name || effectiveProvider} Data Packages
                 </h2>
                 <p className="text-[var(--text-secondary)]">
@@ -385,7 +385,9 @@ export const ProviderPackageDisplay: React.FC<ProviderPackageDisplayProps> = ({
         </Section>
 
         {/* Search and Filters */}
-        <SearchAndFilter {...searchAndFilterConfig} />
+        <div data-tour="packages-search">
+          <SearchAndFilter {...searchAndFilterConfig} />
+        </div>
 
         {/* Package and Bundle Cards */}
         <div className="space-y-6">
@@ -403,19 +405,21 @@ export const ProviderPackageDisplay: React.FC<ProviderPackageDisplayProps> = ({
                       </p>
                     )}
                   </div>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={() => {
-                      setSelectedBulkPackage(pkg);
-                      setShowBulkOrderModal(true);
-                    }}
-                  >
-                    Bulk Order
-                  </Button>
+                  <div data-tour="packages-bulk">
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={() => {
+                        setSelectedBulkPackage(pkg);
+                        setShowBulkOrderModal(true);
+                      }}
+                    >
+                      Bulk Order
+                    </Button>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div data-tour="packages-bundles" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {(bundles[pkg._id!] || [])
                     .filter((bundle) => {
                       const matchesSearch =

@@ -434,7 +434,7 @@ export const ProfilePage: React.FC = () => {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: "var(--text-primary)" }} data-tour="profile-heading">
                 My Profile
               </h1>
               <p className="text-sm sm:text-base" style={{ color: "var(--text-secondary)" }}>

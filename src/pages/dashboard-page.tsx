@@ -614,7 +614,7 @@ export const DashboardPage = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="quick-actions">
+      <div className="quick-actions" data-tour="dashboard-packages">
         <h2 className="text-lg font-medium mb-3 px-2 sm:px-0" style={{ color: "var(--text-primary)" }}>
           All Packages
         </h2>
@@ -680,141 +680,143 @@ export const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="account-overview">
-        <h2 className="text-lg font-medium mb-3 px-2 sm:px-0" style={{ color: "var(--text-primary)" }}>
-          Account Overview
-        </h2>
-        <StatsGrid
-          stats={[
-            {
-              title: "Total Orders Today",
-              value: analyticsData.orders.todayCounts.total,
-              subtitle: `Total: ${analyticsData.orders.total}`,
-              icon: <FaShoppingCart />,
-              size: "sm",
-            },
-            {
-              title: "Today's Spending",
-              value: `₵${analyticsData.revenue.today.toFixed(2)}`,
-              icon: <FaWallet />,
-              size: "sm",
-            },
-            {
-              title: "Total Sales Today",
-              value: `₵${analyticsData.revenue.today.toFixed(2)}`,
-              icon: <FaChartLine />,
-              size: "sm",
-            },
-          ]}
-          columns={3}
-          gap="sm"
-        />
-      </div>
+      <div data-tour="dashboard-overview" className="space-y-4 sm:space-y-6">
+        {/* Stats */}
+        <div className="account-overview">
+          <h2 className="text-lg font-medium mb-3 px-2 sm:px-0" style={{ color: "var(--text-primary)" }}>
+            Account Overview
+          </h2>
+          <StatsGrid
+            stats={[
+              {
+                title: "Total Orders Today",
+                value: analyticsData.orders.todayCounts.total,
+                subtitle: `Total: ${analyticsData.orders.total}`,
+                icon: <FaShoppingCart />,
+                size: "sm",
+              },
+              {
+                title: "Today's Spending",
+                value: `₵${analyticsData.revenue.today.toFixed(2)}`,
+                icon: <FaWallet />,
+                size: "sm",
+              },
+              {
+                title: "Total Sales Today",
+                value: `₵${analyticsData.revenue.today.toFixed(2)}`,
+                icon: <FaChartLine />,
+                size: "sm",
+              },
+            ]}
+            columns={3}
+            gap="sm"
+          />
+        </div>
 
-      {/* Sales Analytics Chart */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-              Sales Analytics
-            </h3>
-            <div className="flex gap-2">
-              <select
-                value={analyticsTimeframe}
-                onChange={(e) => setAnalyticsTimeframe(e.target.value)}
-                className="text-sm block p-2"
+        {/* Sales Analytics Chart */}
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+                Sales Analytics
+              </h3>
+              <div className="flex gap-2">
+                <select
+                  value={analyticsTimeframe}
+                  onChange={(e) => setAnalyticsTimeframe(e.target.value)}
+                  className="text-sm block p-2"
+                  style={{
+                    backgroundColor: "var(--bg-surface-alt)",
+                    border: "1px solid var(--border-color)",
+                    color: "var(--text-primary)",
+                    borderRadius: "var(--radius-md)",
+                    outline: "none",
+                  }}
+                >
+                  <option value="7d">Weekly (Last 7 Days)</option>
+                  <option value="30d">Monthly (Last 30 Days)</option>
+                  <option value="365d">Yearly (Last 12 Months)</option>
+                </select>
+              </div>
+            </div>
+          </CardHeader>
+          <CardBody>
+            {(loading || analyticsLoading) ? (
+              <div className="flex justify-center items-center h-40 sm:h-48">
+                <Spinner />
+              </div>
+            ) : !analyticsData.charts.labels ||
+              analyticsData.charts.labels.length === 0 ? (
+              <div
+                className="h-40 sm:h-48 flex items-center justify-center"
                 style={{
                   backgroundColor: "var(--bg-surface-alt)",
-                  border: "1px solid var(--border-color)",
-                  color: "var(--text-primary)",
-                  borderRadius: "var(--radius-md)",
-                  outline: "none",
+                  borderRadius: "var(--radius-lg)",
                 }}
               >
-                <option value="7d">Weekly (Last 7 Days)</option>
-                <option value="30d">Monthly (Last 30 Days)</option>
-                <option value="365d">Yearly (Last 12 Months)</option>
-              </select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardBody>
-          {(loading || analyticsLoading) ? (
-            <div className="flex justify-center items-center h-40 sm:h-48">
-              <Spinner />
-            </div>
-          ) : !analyticsData.charts.labels ||
-            analyticsData.charts.labels.length === 0 ? (
-            <div
-              className="h-40 sm:h-48 flex items-center justify-center"
-              style={{
-                backgroundColor: "var(--bg-surface-alt)",
-                borderRadius: "var(--radius-lg)",
-              }}
-            >
-              <div className="text-center">
-                <FaChartLine className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  No sales data available for selected period
-                </p>
+                <div className="text-center">
+                  <FaChartLine className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    No sales data available for selected period
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="h-40 sm:h-48">
-              <Bar data={salesChartData} options={salesChartOptions} />
-            </div>
-          )}
-        </CardBody>
-      </Card>
+            ) : (
+              <div className="h-40 sm:h-48">
+                <Bar data={salesChartData} options={salesChartOptions} />
+              </div>
+            )}
+          </CardBody>
+        </Card>
 
-      {/* Order Analytics Chart */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-              Order Analytics ({getTimeframeLabel()})
-            </h3>
-            <Link
-              to="./orders"
-              className="text-sm font-medium"
-              style={{
-                color: "var(--color-secondary)",
-                transition: "color var(--transition-fast)",
-              }}
-            >
-              View Orders
-            </Link>
-          </div>
-        </CardHeader>
-        <CardBody>
-          {(loading || analyticsLoading) ? (
-            <div className="flex justify-center items-center h-40 sm:h-48">
-              <Spinner />
+        {/* Order Analytics Chart */}
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+                Order Analytics ({getTimeframeLabel()})
+              </h3>
+              <Link
+                to="./orders"
+                className="text-sm font-medium"
+                style={{
+                  color: "var(--color-secondary)",
+                  transition: "color var(--transition-fast)",
+                }}
+              >
+                View Orders
+              </Link>
             </div>
-          ) : analyticsData.orders.total === 0 ? (
-            <div
-              className="h-40 sm:h-48 flex items-center justify-center"
-              style={{
-                backgroundColor: "var(--bg-surface-alt)",
-                borderRadius: "var(--radius-lg)",
-              }}
-            >
-              <div className="text-center">
-                <FaShoppingCart className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>No order data available</p>
+          </CardHeader>
+          <CardBody>
+            {(loading || analyticsLoading) ? (
+              <div className="flex justify-center items-center h-40 sm:h-48">
+                <Spinner />
               </div>
-            </div>
-          ) : (
-            <div className="h-40 sm:h-48">
-              <Bar
-                data={orderAnalyticsChartData}
-                options={orderAnalyticsChartOptions}
-              />
-            </div>
-          )}
-        </CardBody>
-      </Card>
+            ) : analyticsData.orders.total === 0 ? (
+              <div
+                className="h-40 sm:h-48 flex items-center justify-center"
+                style={{
+                  backgroundColor: "var(--bg-surface-alt)",
+                  borderRadius: "var(--radius-lg)",
+                }}
+              >
+                <div className="text-center">
+                  <FaShoppingCart className="w-8 h-8 mx-auto mb-2" style={{ color: "var(--text-muted)" }} />
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>No order data available</p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-40 sm:h-48">
+                <Bar
+                  data={orderAnalyticsChartData}
+                  options={orderAnalyticsChartOptions}
+                />
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      </div>
 
       {/* Recent Transactions */}
       <Card className="recent-transactions">

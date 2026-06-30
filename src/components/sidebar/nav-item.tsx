@@ -3,6 +3,14 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import type { NavItem as NavItemConfig } from "./nav-config";
 
+const TOUR_ATTRS: Record<string, string> = {
+  "/agent/dashboard/packages": "sidebar-packages",
+  "/agent/dashboard/orders": "sidebar-orders",
+  "/agent/dashboard/wallet": "sidebar-wallet",
+  "/agent/dashboard/commissions": "sidebar-commission",
+  "/agent/dashboard/profile": "sidebar-profile",
+};
+
 /* ─── Types ────────────────────────────────────────────────────────────────── */
 
 interface NavItemProps {
@@ -82,6 +90,7 @@ export const NavItem = memo(function NavItem({
           type="button"
           onClick={() => onToggle(item.path)}
           aria-expanded={isExpanded}
+          data-tour={TOUR_ATTRS[item.path]}
           className={[
             baseRow,
             parentActive ? activeRow : "",
@@ -141,6 +150,7 @@ export const NavItem = memo(function NavItem({
         to={item.path}
         onClick={onClose}
         aria-current={isActive ? "page" : undefined}
+        data-tour={TOUR_ATTRS[item.path]}
         className={[
           baseRow,
           isActive ? activeRow : "",

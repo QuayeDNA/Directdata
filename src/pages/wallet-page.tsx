@@ -412,7 +412,7 @@ export const WalletPage = () => {
           {/* Wallet Balance Card (design-system) */}
           <Card className="mb-6">
             <CardBody className="py-3">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div data-tour="wallet-balance" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2
                     className="text-lg sm:text-xl font-semibold mb-1"
@@ -430,7 +430,7 @@ export const WalletPage = () => {
                     Available for transactions and purchases
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <div data-tour="wallet-funding" className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <Button
                     variant="success"
                     size="md"
@@ -462,7 +462,7 @@ export const WalletPage = () => {
           </Card>
 
           {/* Transaction History */}
-          <Card className="mb-6">
+          <Card data-tour="wallet-history" className="mb-6">
             <CardHeader
               className="p-4"
               style={{ borderBottom: "1px solid var(--border-color)" }}

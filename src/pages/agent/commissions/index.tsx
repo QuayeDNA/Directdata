@@ -135,16 +135,18 @@ export const CommissionPage = () => {
         </div>
       </div>
 
-      {referralCode && <ReferralBanner referralCode={referralCode} />}
+      <div data-tour="commissions-referral-section">
+        {referralCode && <ReferralBanner referralCode={referralCode} />}
 
-      <StatsGrid
-        stats={[
-          { title: "Total Referrals", value: String(totalReferred), subtitle: "Users referred", icon: <FaUsers />, size: "md" },
-          { title: "Active Referrals", value: String(activeReferred), subtitle: "Users with orders", icon: <FaUserPlus />, size: "md" },
-        ]}
-        columns={2}
-        gap="xs"
-      />
+        <StatsGrid
+          stats={[
+            { title: "Total Referrals", value: String(totalReferred), subtitle: "Users referred", icon: <FaUsers />, size: "md" },
+            { title: "Active Referrals", value: String(activeReferred), subtitle: "Users with orders", icon: <FaUserPlus />, size: "md" },
+          ]}
+          columns={2}
+          gap="xs"
+        />
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
@@ -164,6 +166,7 @@ export const CommissionPage = () => {
               variant="primary"
               onClick={() => setWithdrawDialogOpen(true)}
               leftIcon={<FaWallet className="w-4 h-4" />}
+              data-tour="commissions-withdraw-btn"
             >
               Withdraw
             </Button>
