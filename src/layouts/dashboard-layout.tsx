@@ -5,6 +5,7 @@ import { Header } from "../components/header";
 import { NavigationLoader } from "../components/navigation-loader";
 import { AnnouncementBanner } from "../components/announcements/announcement-banner";
 import { GlobalFab } from "../components/common/GlobalFab";
+import { WhatsAppChannelModal } from "../components/common/WhatsAppChannelModal";
 import { TutorialOverlay } from "../components/tutorial/TutorialOverlay";
 
 const MOBILE_BREAKPOINT = 768;
@@ -46,6 +47,7 @@ export const DashboardLayout = () => {
         <Header onMenuClick={toggleSidebar} />
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 bg-[var(--color-ground)]">
+          <WhatsAppChannelModal />
           <TutorialOverlay />
           <div className="mx-auto w-full max-w-[1600px]">
             <NavigationLoader delay={150}>

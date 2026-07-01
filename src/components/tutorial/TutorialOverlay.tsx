@@ -517,7 +517,9 @@ export const TutorialOverlay = () => {
       authState.isAuthenticated &&
       isAgent(authState.user?.userType) &&
       (
-        (authState.user?.isFirstTime && localStorage.getItem(DONE_KEY) !== "true") ||
+        (authState.user?.isFirstTime &&
+         localStorage.getItem("dd_whatsapp_channel_seen") === "true" &&
+         localStorage.getItem(DONE_KEY) !== "true") ||
         devTrigger
       );
 

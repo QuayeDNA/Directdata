@@ -6,6 +6,6 @@ export const CONTACTS = {
       `https://wa.me/+233595731124?text=${encodeURIComponent(msg)}`,
   },
   community: {
-    waGroupLink: "https://chat.whatsapp.com/GZd9FCxP9U9LMRHw7r7UXX",
+    waGroupLink: "https://whatsapp.com/channel/0029Vb8nnX66hENo3np3rj0i",
   },
 } as const;
